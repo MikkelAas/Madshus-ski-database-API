@@ -9,4 +9,5 @@ return (object) array(
     'db_username' => '',
     'db_password' => '',
     'db_name' => '',
+    'db_charset' => 'utf8mb4'
 );
