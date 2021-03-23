@@ -1,2 +1,4 @@
 .idea/
 vendor/
+config/config.php
+test_script.php
