@@ -1,0 +1,17 @@
+image: rubenchristoffer/php8_codeception_composer
+
+# Select what we should cache
+cache:
+  paths:
+    - vendor/
+
+before_script:
+  # Install all project dependencies
+  - composer install
+  # Run webserver
+  - php -S localhost:8085 --docroot public &>/dev/null&
+
+# Test
+test:
+  script:
+    - vendor/bin/codecept run
