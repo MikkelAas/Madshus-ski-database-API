@@ -4,10 +4,8 @@ class SkiModel {
 	protected $db;
 	
 	public function __construct() {
-		$this->db = new PDO('mysql:host='.DB_HOST.'.dbname='.DB_NAME.';charset=utf8',
-		DB_USER, DB_PWD,
-		array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)) ;
-	}
+		$this->db = require('db/pdo_connection.php');
+    }
 	
 	/**
 	* Returns a collection of resources from the database
@@ -34,7 +32,7 @@ class SkiModel {
 	 */
 	function getAllSkiTypes(): array {
 		$query = 'SELECT * FROM ski_type';
-		
+
 		return $this->getCollection($query);
 	}
 	
