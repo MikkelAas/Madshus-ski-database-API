@@ -17,16 +17,10 @@ class SkiModel {
                 FROM ski_type
         ';
 
-		$res = array();
-
         $stmt = $this->db->prepare($query);
         $stmt->execute();
 
-        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            return $row;
-        }
-
-        return $res;
+        return $stmt->fetchAll();
 	}
 	
 	/**
@@ -42,17 +36,11 @@ class SkiModel {
                 FROM ski_type 
                 WHERE id = :id';
 
-        $res = array();
-
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':id', $id);
         $stmt->execute();
 
-        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            return $row;
-        }
-
-        return $res;
+        return $stmt->fetchAll();
 	}
 	
 	/**
@@ -65,17 +53,11 @@ class SkiModel {
 	function getSkiTypeByModel(string $model): array {
 		$query = 'SELECT * FROM ski_type WHERE model = :model';
 
-        $res = array();
-
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':model', $model);
         $stmt->execute();
 
-        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            return $row;
-        }
-
-        return $res;
+        return $stmt->fetchAll();
 	}
 	
 	/**
@@ -88,16 +70,10 @@ class SkiModel {
 	function getSkiTypeByGrip(string $grip_system): array {
 		$query = 'SELECT * FROM ski_type WHERE grip_system = :grip_system';
 
-        $res = array();
-
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':grip_system', $grip_system);
         $stmt->execute();
 
-        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            return $row;
-        }
-
-        return $res;
+        return $stmt->fetchAll();
 	}
 }
