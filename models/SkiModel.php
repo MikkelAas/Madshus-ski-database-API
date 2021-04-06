@@ -6,34 +6,27 @@ class SkiModel {
 	public function __construct() {
 		$this->db = require('db/pdo_connection.php');
     }
-	
-	/**
-	* Returns a collection of resources from the database
-	* @param string $query the query to be run to get set of resources
-	* @return array an array of resources. The array will be empty
-	*               if there are no matching resources
-	*/
-	private function getCollection(string $query): array {
-		$res = array();
-		
-		$stmt = $this->db->prepare($query);
-		$stmt->execute();
-		
-		if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			return $row;
-		}
-		
-		return $res;
-	}
-	
+
 	/**
 	 * Returns a collection containing all the resources in the database
 	 * @return array an array of resources
 	 */
 	function getAllSkiTypes(): array {
-		$query = 'SELECT * FROM ski_type';
+		$query = '
+                SELECT * 
+                FROM ski_type
+        ';
 
-		return $this->getCollection($query);
+		$res = array();
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            return $row;
+        }
+
+        return $res;
 	}
 	
 	/**
@@ -44,9 +37,22 @@ class SkiModel {
 	 * @return array an array of resources
 	 */
 	function getSkiTypeById(int $id): array {
-		$query = 'SELECT * FROM ski_type WHERE id = :id';
-		
-		return $this->getCollection($query);
+		$query = '
+                SELECT * 
+                FROM ski_type 
+                WHERE id = :id';
+
+        $res = array();
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':id', $id);
+        $stmt->execute();
+
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            return $row;
+        }
+
+        return $res;
 	}
 	
 	/**
@@ -58,8 +64,18 @@ class SkiModel {
 	 */
 	function getSkiTypeByModel(string $model): array {
 		$query = 'SELECT * FROM ski_type WHERE model = :model';
-		
-		return $this->getCollection($query);
+
+        $res = array();
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':model', $model);
+        $stmt->execute();
+
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            return $row;
+        }
+
+        return $res;
 	}
 	
 	/**
@@ -71,7 +87,17 @@ class SkiModel {
 	 */
 	function getSkiTypeByGrip(string $grip_system): array {
 		$query = 'SELECT * FROM ski_type WHERE grip_system = :grip_system';
-		
-		return $this->getCollection($query);
+
+        $res = array();
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':grip_system', $grip_system);
+        $stmt->execute();
+
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            return $row;
+        }
+
+        return $res;
 	}
 }
