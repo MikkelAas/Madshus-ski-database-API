@@ -224,24 +224,35 @@ class OrderModel{
     }
 
     /**
-     * Retrieves the latest state of an order
-     * @param int $orderId
-     * @return string
+     * Retrieves the latest state of an order.
+     * @param int $orderId Takes the order id.
+     * @return string Returns the newest statement of an order.
      */
     public function getOrderStatement(int $orderId): string{
 
-        $query1 = 'SELECT MAX(id) FROM ski_order_state_history';
+        // Selects the newest input by taking the maximum of the auto increment id (not ideal)
+        // TODO: Find a better solution to the ID-problem
+        $query1 = '
+            SELECT MAX(id) 
+            FROM ski_order_state_history
+        ';
         $stmt = $this->db->prepare($query1);
         $stmt->execute();
 
         $mostRecentId = $stmt->fetchColumn();
 
-        $query2 = 'SELECT * FROM ski_order_state_history WHERE ski_order_id = :order_number AND id = :most_recent_id';
+        // Selects the state where the order id and most recent id matches.
+        $query2 = '
+            SELECT ski_order_state_history.state 
+            FROM ski_order_state_history 
+            WHERE ski_order_id = :order_number AND id = :most_recent_id
+        ';
 
         $stmt = $this->db->prepare($query2);
         $stmt->bindValue(':order_number', $orderId);
         $stmt->bindValue(':most_recent_id', $mostRecentId);
         $stmt->execute();
-        return $stmt->fetchColumn(3);
+        
+        return $stmt->fetchColumn(0);
     }
 }
