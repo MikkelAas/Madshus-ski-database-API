@@ -1,4 +1,4 @@
-image: rubenchristoffer/php8_codeception_composer
+image: rubenchristoffer/php7_mysql_codeception_composer
 
 # Select what we should cache
 cache:
@@ -10,6 +10,10 @@ before_script:
   - composer install
   # Run webserver
   - php -S localhost:8085 --docroot public &>/dev/null&
+  # Run mysql
+  - service mysql start
+  # Create test database
+  - mysql -u root -e "CREATE DATABASE db_project"
 
 # Test
 test:
