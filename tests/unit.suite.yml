@@ -12,7 +12,7 @@ modules:
             dump: 'tests/_data/db.sql'
             populate: true
             cleanup: true
-            populator: 'mysql -u $user -h $host $dbname < $dump'
+            populator: 'mysql -u $user $dbname < $dump'
         - Asserts
         - \Helper\Unit
     step_decorators: ~        
