@@ -150,7 +150,6 @@ class OrderModel{
                 :date_now)
         ';
 
-        print (date('Y-d-m'));
         $stmt = $this->db->prepare($query2);
         $stmt->bindValue(':original_ski_order_id', $originalSkiOrderId);
         $stmt->bindValue(':employee_id', $employeeId);
@@ -165,13 +164,23 @@ class OrderModel{
      */
     public function deleteOrder(int $orderNumber){
 
+        // Deletes all history of an order from the ski order history table.
+        $query1 = '
+            DELETE FROM ski_order_state_history
+            WHERE ski_order_id = :order_number
+        ';
+
+        $stmt = $this->db->prepare($query1);
+        $stmt->bindValue(':order_number', $orderNumber);
+        $stmt->execute();
+
         // Deletes an entry from the ski order table.
-        $query = '
+        $query2 = '
             DELETE FROM ski_order
             WHERE ski_order.order_number = :order_number
         ';
 
-        $stmt = $this->db->prepare($query);
+        $stmt = $this->db->prepare($query2);
         $stmt->bindValue(':order_number',$orderNumber);
         $stmt->execute();
     }
@@ -205,7 +214,6 @@ class OrderModel{
             ON ski_order.order_number = ski_order_state_history.ski_order_id
             WHERE
             ski_order_state_history.date >= "2021-07-04"');
-            print ($query);
         }
 
         $stmt = $this->db->prepare($query);
@@ -213,5 +221,27 @@ class OrderModel{
         $stmt->execute();
 
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Retrieves the latest state of an order
+     * @param int $orderId
+     * @return string
+     */
+    public function getOrderStatement(int $orderId): string{
+
+        $query1 = 'SELECT MAX(id) FROM ski_order_state_history';
+        $stmt = $this->db->prepare($query1);
+        $stmt->execute();
+
+        $mostRecentId = $stmt->fetchColumn();
+
+        $query2 = 'SELECT * FROM ski_order_state_history WHERE ski_order_id = :order_number AND id = :most_recent_id';
+
+        $stmt = $this->db->prepare($query2);
+        $stmt->bindValue(':order_number', $orderId);
+        $stmt->bindValue(':most_recent_id', $mostRecentId);
+        $stmt->execute();
+        return $stmt->fetchColumn(3);
     }
 }
