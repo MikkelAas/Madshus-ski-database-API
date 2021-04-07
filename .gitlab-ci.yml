@@ -14,6 +14,18 @@ before_script:
   - service mysql start
   # Create test database
   - mysql -u root -e "CREATE DATABASE db_project"
+  # Create config file
+  - echo "<?php
+
+    const config = array(
+    'db_driver' => 'mysql',
+    'db_host' => 'localhost',
+    'db_port' => '3306',
+    'db_username' => 'root',
+    'db_password' => '',
+    'db_name' => 'db_project',
+    'db_charset' => 'utf8mb4'
+    );" > config/config_test.php
 
 # Test
 test:
