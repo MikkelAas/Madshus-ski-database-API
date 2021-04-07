@@ -1,4 +1,4 @@
-image: rubenchristoffer/php8_codeception_composer
+image: rubenchristoffer/php7_mysql_codeception_composer
 
 # Select what we should cache
 cache:
@@ -10,6 +10,22 @@ before_script:
   - composer install
   # Run webserver
   - php -S localhost:8085 --docroot public &>/dev/null&
+  # Run mysql
+  - service mysql start
+  # Create test database
+  - mysql -u root -e "CREATE DATABASE db_project"
+  # Create config file
+  - echo "<?php
+
+    const config = array(
+    'db_driver' => 'mysql',
+    'db_host' => 'localhost',
+    'db_port' => '3306',
+    'db_username' => 'root',
+    'db_password' => '',
+    'db_name' => 'db_project',
+    'db_charset' => 'utf8mb4'
+    );" > config/config_test.php
 
 # Test
 test:
