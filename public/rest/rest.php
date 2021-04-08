@@ -7,7 +7,13 @@ const endpoints = array(
 
 require_once('../../config/config.php');
 
+$queries = array();
+
 $path = $_SERVER['REQUEST_URI'];
+parse_str($_SERVER['QUERY_STRING'], $queries);
+$method = $_SERVER["REQUEST_METHOD"];
+$pathParts = explode("/", $path);
+
 
 header("content-type: application/json");
 
