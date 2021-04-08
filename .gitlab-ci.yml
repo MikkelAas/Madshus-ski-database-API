@@ -28,6 +28,8 @@ before_script:
     'db_name' => 'db_project',
     'db_charset' => 'utf8mb4'
     );" >> config/config_test.php
+  # Print config file
+  - cat config/config_test.php
 
 # Test
 test:
