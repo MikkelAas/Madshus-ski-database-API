@@ -1,12 +1,19 @@
 <?php
 
 const endpoints = array(
-    "/rest/diag"=>"public/rest/endpoints/diag.php"
+    "/rest/diag"=>"public/rest/endpoints/diag.php",
+    "/rest/pub/skis"=>"public/rest/pub/skis.php"
 );
 
 require_once('../../config/config.php');
 
+$queries = array();
+
 $path = $_SERVER['REQUEST_URI'];
+parse_str($_SERVER['QUERY_STRING'], $queries);
+$method = $_SERVER["REQUEST_METHOD"];
+$pathParts = explode("/", $path);
+
 
 header("content-type: application/json");
 
