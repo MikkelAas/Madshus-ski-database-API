@@ -48,11 +48,20 @@ class OrderModel{
      * Creates an order.
      * @param int $totalPrice Sets the total price.
      * @param mixed $refToLargerOrder Is either an int or null.
-     * @param int $customerId
+     * @param int $customerId The id of the customer that the order belongs to.
      * @param string $stateMessage Sets the state of the order.
      * @param mixed $employeeId Is either an int or null.
+     * @param int $skipTypeId The id of the type os ski that is ordered.
+     * @param int $quantity The quantity of the type of ski.
      */
-    public function createOrder(int $totalPrice, $refToLargerOrder, int $customerId, string $stateMessage , $employeeId){
+    public function createOrder(
+        int $totalPrice,
+        $refToLargerOrder,
+        int $customerId,
+        string $stateMessage ,
+        $employeeId,
+        int $skipTypeId,
+        int $quantity){
 
         // Checks if the state message is valid.
         if ($stateMessage != 'new' && $stateMessage != 'open' && $stateMessage != "skis available"){
@@ -91,9 +100,6 @@ class OrderModel{
 
         $orderId = (int)$stmt->fetchColumn(0);
 
-
-
-
         // Inserts a new entry in the ski order state history.
         $query3 = '
             INSERT INTO `ski_order_state_history` (`ski_order_id`, `employee_id`, `state`, `date`) 
@@ -102,7 +108,7 @@ class OrderModel{
                 :employee_id,
                 :state_message,
                 :date_now 
-                )
+            )
         ';
 
         $stmt = $this->db->prepare($query3);
@@ -111,6 +117,23 @@ class OrderModel{
         $stmt->bindValue(':state_message', $stateMessage);
         $stmt->bindValue(':date_now', date("Y-d-m"));
         $stmt->execute();
+
+        $query4 = '
+            INSERT INTO `ski_order_ski_type` (`id`, `order_id`, `ski_type_id`, `quantity`) 
+            VALUES (
+                NULL,
+                :order_number,
+                :ski_type_id,
+                :number_of_skis
+            );
+        ';
+
+        $stmt = $this->db->prepare($query4);
+        $stmt->bindValue(':order_number', $orderId);
+        $stmt->bindValue(':ski_type_id', $skipTypeId);
+        $stmt->bindValue(':number_of_skis', $quantity);
+        $stmt->execute();
+
     }
 
     /**
@@ -159,10 +182,10 @@ class OrderModel{
     }
 
     /**
-     * Deletes an entry from the ski order table.
-     * @param int $orderNumber The id of the order that will be deleted.
+     * Deletes an order.
+     * @param int $orderId The id of the order that will be deleted.
      */
-    public function deleteOrder(int $orderNumber){
+    public function deleteOrder(int $orderId){
 
         // Deletes all history of an order from the ski order history table.
         $query1 = '
@@ -171,18 +194,54 @@ class OrderModel{
         ';
 
         $stmt = $this->db->prepare($query1);
-        $stmt->bindValue(':order_number', $orderNumber);
+        $stmt->bindValue(':order_number', $orderId);
+        $stmt->execute();
+
+        // Deletes an entry from the ski order ski type table.
+        $query2 = '
+            DELETE FROM ski_order_ski_type
+            WHERE ski_order_ski_type.ski_order_id = :order_number
+        ';
+
+        $stmt = $this->db->prepare($query2);
+        $stmt->bindValue(':order_number', $orderId);
         $stmt->execute();
 
         // Deletes an entry from the ski order table.
-        $query2 = '
+        $query3 = '
             DELETE FROM ski_order
             WHERE ski_order.order_number = :order_number
         ';
 
-        $stmt = $this->db->prepare($query2);
-        $stmt->bindValue(':order_number',$orderNumber);
+        $stmt = $this->db->prepare($query3);
+        $stmt->bindValue(':order_number',$orderId);
         $stmt->execute();
+    }
+
+    /**
+     * Gets the details of one specific order
+     * @param int $orderId The id of the order.
+     * @return array Returns an array with order information
+     */
+    public function getOrder(int $orderId): array{
+        $query = '
+            SELECT 
+                   ski_order.order_number, 
+                   ski_order.total_price, 
+                   ski_order.reference_to_larger_order, 
+                   ski_order.customer_id,
+                   ski_order_ski_type.ski_type_id,
+                   ski_order_ski_type.quantity   
+            FROM ski_order
+            INNER JOIN ski_order_ski_type ON ski_order.order_number = ski_order_ski_type.order_id
+            WHERE ski_order.order_number = :order_number
+        ';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':order_number', $orderId);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
     }
 
     /**
@@ -193,13 +252,16 @@ class OrderModel{
      */
     public function getOrders($date): array{
 
-        // Selects every over from the ski order table.
+        // Selects every over from the ski order table, and the ski type id and the quantity.
         $query = '
                 SELECT ski_order.order_number, 
                     ski_order.total_price, 
                     ski_order.reference_to_larger_order, 
-                    ski_order.customer_id
+                    ski_order.customer_id,
+                    ski_order_ski_type.ski_type_id,
+                    ski_order_ski_type.quantity
                 FROM `ski_order`
+                INNER JOIN ski_order_ski_type ON ski_order.order_number = ski_order_ski_type.order_id
                 %s
             ';
 
@@ -218,6 +280,35 @@ class OrderModel{
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':date', $date);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Returns an array of orders based on their state.
+     * @param string $searchState The state you want.
+     * @return array An array of orders.
+     */
+    public function getOrderBasedOnState(string $searchState): array{
+
+        // Selects all orders that matches the state.
+        $query = '
+            SELECT 
+                   ski_order.order_number, 
+                   ski_order.total_price, 
+                   ski_order.reference_to_larger_order, 
+                   ski_order.customer_id,
+                   ski_order_ski_type.ski_type_id,
+                   ski_order_ski_type.quantity   
+            FROM ski_order
+            INNER JOIN ski_order_ski_type ON ski_order.order_number = ski_order_ski_type.order_id
+            INNER JOIN ski_order_state_history ON ski_order_ski_type.order_id = ski_order_state_history.ski_order_id
+            WHERE ski_order_state_history.state = :search_state
+        ';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':search_state', $searchState);
         $stmt->execute();
 
         return $stmt->fetchAll();
@@ -252,7 +343,7 @@ class OrderModel{
         $stmt->bindValue(':order_number', $orderId);
         $stmt->bindValue(':most_recent_id', $mostRecentId);
         $stmt->execute();
-        
+
         return $stmt->fetchColumn(0);
     }
 }

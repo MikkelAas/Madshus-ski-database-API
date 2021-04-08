@@ -2,6 +2,7 @@
 require_once('config/config_test.php');
 require('models/OrderModel.php');
 
+// TODO: Find out why the database doesn't reset.
 class SkiModelTest extends \Codeception\Test\Unit{
     public function testGetAllOrdersForCustomer(){
         $orderModel = new OrderModel();
