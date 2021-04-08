@@ -2,7 +2,6 @@
 
 require ('models/OrderModel.php');
 
-$queries = array();
 $orderModel = new OrderModel();
 
 switch ($method){
