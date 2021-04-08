@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Apr 07, 2021 at 11:45 AM
+-- Generation Time: Apr 08, 2021 at 12:12 PM
 -- Server version: 8.0.22
 -- PHP Version: 7.4.13
 
@@ -40,7 +40,10 @@ CREATE TABLE `customer` (
 --
 
 INSERT INTO `customer` (`id`, `name`, `start_date`, `end_date`) VALUES
-(1, 'Bob Dylan', '2021-03-09', '2021-03-17');
+(1, 'Bob Dylan', '2021-03-09', '2021-03-17'),
+(2, 'Din Mamma', '2021-04-11', NULL),
+(3, 'Jens Stoltenberg', '2021-03-01', '2021-04-30'),
+(4, 'Din Pappa', '2020-12-07', NULL);
 
 -- --------------------------------------------------------
 
@@ -76,6 +79,13 @@ CREATE TABLE `franchise` (
   `negotiated_buying_price` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `franchise`
+--
+
+INSERT INTO `franchise` (`id`, `shipping_address`, `negotiated_buying_price`) VALUES
+(4, 'Teknologivegen 22, 2815 Gjøvik', 35000);
+
 -- --------------------------------------------------------
 
 --
@@ -88,6 +98,13 @@ CREATE TABLE `individual_store` (
   `shipping_address` varchar(50) NOT NULL,
   `negotiated_buying_price` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `individual_store`
+--
+
+INSERT INTO `individual_store` (`id`, `shipping_address`, `negotiated_buying_price`) VALUES
+(3, 'Larsgårdsvegen 2, 6009 Ålesund', 35001);
 
 -- --------------------------------------------------------
 
@@ -102,6 +119,13 @@ CREATE TABLE `partner_stores` (
   `name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `partner_stores`
+--
+
+INSERT INTO `partner_stores` (`id`, `franchise_id`, `name`) VALUES
+(1, 4, 'Den hemmelige butikken i kjelleren i A bygget');
+
 -- --------------------------------------------------------
 
 --
@@ -115,6 +139,17 @@ CREATE TABLE `produced_skis` (
   `ski_type` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `produced_skis`
+--
+
+INSERT INTO `produced_skis` (`prod_num`, `prod_date`, `ski_type`) VALUES
+(1, '2021-01-11', 2),
+(2, '2021-01-05', 1),
+(3, '2021-01-11', 1),
+(4, '2020-12-21', 3),
+(5, '2020-11-18', 2);
+
 -- --------------------------------------------------------
 
 --
@@ -126,6 +161,13 @@ CREATE TABLE `production_plan` (
   `id` int NOT NULL,
   `start_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `production_plan`
+--
+
+INSERT INTO `production_plan` (`id`, `start_date`) VALUES
+(1, '2021-04-08');
 
 -- --------------------------------------------------------
 
@@ -140,6 +182,14 @@ CREATE TABLE `production_plan_ski` (
   `ski_type_id` int NOT NULL,
   `daily_amount` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `production_plan_ski`
+--
+
+INSERT INTO `production_plan_ski` (`id`, `production_plan_id`, `ski_type_id`, `daily_amount`) VALUES
+(1, 1, 1, 200),
+(2, 1, 3, 20);
 
 -- --------------------------------------------------------
 
@@ -158,6 +208,13 @@ CREATE TABLE `shipment` (
   `transport_company` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `shipment`
+--
+
+INSERT INTO `shipment` (`shipment_num`, `store_name`, `shipping_address`, `sched_pickup_date`, `state`, `driver_id`, `transport_company`) VALUES
+(1, 'Den store skibutikken i Texas', 'Texas ', '2021-04-06', 'ready', 7, 'Shipped shipments shipping company inc');
+
 -- --------------------------------------------------------
 
 --
@@ -170,6 +227,14 @@ CREATE TABLE `shipment_orders` (
   `shipment_num` int NOT NULL,
   `order_num` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `shipment_orders`
+--
+
+INSERT INTO `shipment_orders` (`id`, `shipment_num`, `order_num`) VALUES
+(1, 1, 4),
+(2, 1, 13);
 
 -- --------------------------------------------------------
 
@@ -191,9 +256,9 @@ CREATE TABLE `ski_order` (
 
 INSERT INTO `ski_order` (`order_number`, `total_price`, `reference_to_larger_order`, `customer_id`) VALUES
 (1, 100, NULL, 1),
-(2, 200, NULL, 1),
 (4, 300, NULL, 1),
-(5, 300, NULL, 1);
+(10, 10000, NULL, 1),
+(13, 1000, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -208,6 +273,18 @@ CREATE TABLE `ski_order_ski_type` (
   `ski_type_id` int NOT NULL,
   `quantity` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `ski_order_ski_type`
+--
+
+INSERT INTO `ski_order_ski_type` (`id`, `order_id`, `ski_type_id`, `quantity`) VALUES
+(11, 1, 1, 4),
+(12, 4, 3, 200),
+(13, 10, 2, 8176),
+(14, 13, 1, 55),
+(15, 13, 1, 100),
+(16, 13, 2, 500);
 
 -- --------------------------------------------------------
 
@@ -229,10 +306,10 @@ CREATE TABLE `ski_order_state_history` (
 --
 
 INSERT INTO `ski_order_state_history` (`id`, `ski_order_id`, `employee_id`, `state`, `date`) VALUES
-(1, 1, NULL, 'whatever', '2021-04-14'),
-(2, 2, 1, 'new', '2021-04-06'),
-(2, 4, 1, 'dfgdfgd', '2021-04-29'),
-(5, 1, NULL, 'zulul', '2021-04-05');
+(38, 1, 1, 'new', '2021-04-15'),
+(39, 4, NULL, ' new', '2021-04-05'),
+(40, 10, 1, 'new', '2021-03-16'),
+(41, 13, NULL, 'new', '2021-03-09');
 
 -- --------------------------------------------------------
 
@@ -277,6 +354,13 @@ CREATE TABLE `team_skier` (
   `club` varchar(50) NOT NULL,
   `numer_of_skis_pr_year` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `team_skier`
+--
+
+INSERT INTO `team_skier` (`id`, `dob`, `club`, `numer_of_skis_pr_year`) VALUES
+(2, '2021-04-07', 'Famileklubben', 50);
 
 --
 -- Indexes for dumped tables
@@ -389,10 +473,70 @@ ALTER TABLE `team_skier`
 --
 
 --
+-- AUTO_INCREMENT for table `customer`
+--
+ALTER TABLE `customer`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `employee`
+--
+ALTER TABLE `employee`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `partner_stores`
+--
+ALTER TABLE `partner_stores`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `produced_skis`
+--
+ALTER TABLE `produced_skis`
+  MODIFY `prod_num` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `production_plan`
+--
+ALTER TABLE `production_plan`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `production_plan_ski`
+--
+ALTER TABLE `production_plan_ski`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `shipment`
+--
+ALTER TABLE `shipment`
+  MODIFY `shipment_num` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `shipment_orders`
+--
+ALTER TABLE `shipment_orders`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `ski_order`
 --
 ALTER TABLE `ski_order`
-  MODIFY `order_number` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `order_number` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+
+--
+-- AUTO_INCREMENT for table `ski_order_ski_type`
+--
+ALTER TABLE `ski_order_ski_type`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT for table `ski_order_state_history`
+--
+ALTER TABLE `ski_order_state_history`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `ski_type`
