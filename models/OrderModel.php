@@ -10,13 +10,13 @@ class OrderModel{
     /**
      * @var mixed
      */
-    private PDO $db;
+    protected $db;
 
     /**
      * OrderModel constructor.
      */
     public function __construct(){
-        $this->db = require_once('db/pdo_connection.php');
+        $this->db = require('db/pdo_connection.php');
     }
 
     /**
@@ -136,7 +136,7 @@ class OrderModel{
         $stmt->bindValue(':order_id', $orderId);
         $stmt->bindValue('employee_id', $employeeId);
         $stmt->bindValue(':state_message', $stateMessage);
-        $stmt->bindValue(':date_now', date("Y-d-m"));
+        $stmt->bindValue(':date_now', date("Y-m-d"));
         $stmt->execute();
 
         $query4 = '
@@ -198,7 +198,7 @@ class OrderModel{
         $stmt->bindValue(':original_ski_order_id', $originalSkiOrderId);
         $stmt->bindValue(':employee_id', $employeeId);
         $stmt->bindValue(':new_state', $newState);
-        $stmt->bindValue(':date_now', date("Y-d-m"));
+        $stmt->bindValue(':date_now', date("Y-m-d"));
         $stmt->execute();
     }
 
@@ -221,7 +221,7 @@ class OrderModel{
         // Deletes an entry from the ski order ski type table.
         $query2 = '
             DELETE FROM ski_order_ski_type
-            WHERE ski_order_ski_type.ski_order_id = :order_number
+            WHERE ski_order_ski_type.order_id = :order_number
         ';
 
         $stmt = $this->db->prepare($query2);
@@ -250,8 +250,11 @@ class OrderModel{
                    ski_order.order_number, 
                    ski_order.total_price, 
                    ski_order.reference_to_larger_order, 
-                   ski_order.customer_id 
+                   ski_order.customer_id,
+                   ski_order_ski_type.ski_type_id,
+                   ski_order_ski_type.quantity
             FROM ski_order
+            INNER JOIN ski_order_ski_type ON ski_order.order_number = ski_order_ski_type.order_id
             WHERE ski_order.order_number = :order_number
         ';
 
@@ -259,21 +262,23 @@ class OrderModel{
         $stmt->bindValue(':order_number', $orderId);
         $stmt->execute();
 
-        $res1 = $stmt->fetchAll();
+        $res = array();
 
-        $query2 = '
-            SELECT ski_order_ski_type.ski_type_id, ski_order_ski_type.quantity 
-            FROM ski_order_ski_type 
-            WHERE ski_order_ski_type.order_id = :order_number
-        ';
-
-        $stmt = $this->db->prepare($query2);
-        $stmt->bindValue(':order_number', $orderId);
-        $stmt->execute();
-
-        $res2 = $stmt->fetchAll();
-
-        return array($res1, $res2);
+        while ($row = $stmt->fetch()){
+            $orderNumber = $row['order_number'];
+            if (!array_key_exists($orderNumber, $res)){
+                $res[$orderNumber] = array(array(
+                    'order_number'=>$orderNumber,
+                    'total_price'=>$row['total_price'],
+                    'reference_to_larger_order'=>$row['reference_to_larger_order'],
+                    'customer_id'=>$row['customer_id']),
+                    array()
+                );
+            }
+            array_push($res[$orderNumber][1], array('ski_type_id'=>$row['ski_type_id'], 'quantity'=>$row['quantity']));
+        }
+        $res = array_values($res);
+        return $res;
     }
 
     /**
@@ -307,7 +312,7 @@ class OrderModel{
             INNER JOIN ski_order_state_history 
             ON ski_order.order_number = ski_order_state_history.ski_order_id
             WHERE
-            ski_order_state_history.date >= "2021-07-04"');
+            ski_order_state_history.date >= :date');
         }
 
         $stmt = $this->db->prepare($query);
@@ -377,7 +382,6 @@ class OrderModel{
         }
         $res = array_values($res);
         return $res;
-
     }
 
     /**

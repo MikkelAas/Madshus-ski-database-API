@@ -16,11 +16,19 @@ class SkiModelTest extends \Codeception\Test\Unit{
     public function testCreateOrder(){
         $orderModel = new OrderModel();
 
-        $orderModel->createOrder(10000, NULL, 1, "new", NULL, 1, 250);
+        $orderModel->createOrder(
+            10000,
+            NULL,
+            1,
+            "new",
+            NULL,
+            1,
+            250
+        );
 
         $res = $orderModel->getAllOrdersForCustomer(1);
 
-        self::assertCount(1,$res);
+        self::assertCount(5,$res);
     }
 
     public function testChangeOrderState(){
@@ -36,19 +44,21 @@ class SkiModelTest extends \Codeception\Test\Unit{
     public function testDeleteOrder(){
         $orderModel = new OrderModel();
 
-        $orderModel->deleteOrder(2);
+        $orderModel->deleteOrder(1);
 
         $res = $orderModel->getAllOrdersForCustomer(1);
 
-        self::assertCount(12, $res);
+        self::assertCount(3, $res);
     }
 
     public function testGetOrders(){
         $orderModel = new OrderModel();
 
-        $res = $orderModel->getOrders('');
+        $res1 = $orderModel->getOrders('');
+        $res2 = $orderModel->getOrders('2021-04-15');
 
-        self::assertCount(12, $res);
+        self::assertCount(4, $res1);
+        self::assertCount(1, $res2);
     }
 
     public function testGetOrder(){
@@ -56,8 +66,7 @@ class SkiModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getOrder(1);
 
-        self::assertCount(12, $res);
-        self::assertEquals('250', $res[5]['quantity']);
+        self::assertCount(1, $res);
     }
 
     public function testGetOrderBasedOnState(){
@@ -65,7 +74,16 @@ class SkiModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getOrdersBasedOnState('new');
 
-        self::assertCount(1, $res);
-        self::assertNotEquals('skis available', $res[5]['state']);
+        self::assertCount(3, $res);
+    }
+
+    public function testAddToOrder(){
+        $orderModel = new OrderModel();
+
+        $orderModel->addToOrder(1, 1, 100);
+
+        $res = $orderModel->getOrder(1);
+
+        self::assertCount(2, $res[0][1]);
     }
 }
