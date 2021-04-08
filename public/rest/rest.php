@@ -10,9 +10,17 @@ $path = $_SERVER['REQUEST_URI'];
 
 header("content-type: application/json");
 
-if (array_key_exists($path, endpoints)) {
-    require(endpoints[$path]);
-} else {
+$matchedEndpoint = false;
+
+foreach (endpoints as $endpoint=>$endpoint_path) {
+    // If path starts with endpoint
+    if (strpos($path, $endpoint) === 0) {
+        $matchedEndpoint = true;
+        require($endpoint_path);
+    }
+}
+
+if (!$matchedEndpoint) {
     http_response_code(404);
     echo json_encode(array("error"=>"That endpoint does not exist!"));
 }
