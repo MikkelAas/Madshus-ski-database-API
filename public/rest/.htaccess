@@ -1,14 +1,5 @@
-# This will allow you to access php file without using .php extension in URL
+# This will redirect all REST paths to the REST controller
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ rest.php/$1 [L]
-
-
-#RewriteCond %{THE_REQUEST} /([^.]+)\.php [NC]
-#RewriteRule ^ /%1 [NC,L,R]
-
-#RewriteCond %{REQUEST_FILENAME} !-d
-#RewriteCond %{REQUEST_FILENAME} !-f
-#RewriteCond %{REQUEST_FILENAME}.php -f
-#RewriteRule (.*) $1.php [L]
