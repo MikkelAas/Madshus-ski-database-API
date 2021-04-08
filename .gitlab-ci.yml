@@ -15,10 +15,8 @@ before_script:
   # Create test database
   - mysql -u root -e "CREATE DATABASE db_project"
   # Create config file
-  - echo "<?php
-
-   " > config/config_test.php
-  - echo "set_include_path('$(pwd)');"
+  - echo "<?php  " > config/config_test.php
+  - echo "set_include_path('$(pwd)');" >> config/config_test.php
   - echo "
 
     const config = array(
