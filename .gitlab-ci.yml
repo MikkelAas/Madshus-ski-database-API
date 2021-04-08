@@ -17,6 +17,10 @@ before_script:
   # Create config file
   - echo "<?php
 
+   " > config/config_test.php
+  - echo "set_include_path('$(pwd)');"
+  - echo "
+
     const config = array(
     'db_driver' => 'mysql',
     'db_host' => 'localhost',
@@ -25,7 +29,7 @@ before_script:
     'db_password' => '',
     'db_name' => 'db_project',
     'db_charset' => 'utf8mb4'
-    );" > config/config_test.php
+    );" >> config/config_test.php
 
 # Test
 test:
