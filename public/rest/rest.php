@@ -1,7 +1,8 @@
 <?php
 
 const endpoints = array(
-    "/rest/diag"=>"public/rest/endpoints/diag.php"
+    "/rest/diag"=>"public/rest/endpoints/diag.php",
+    "/rest/pub/skis"=>"public/rest/pub/skis.php"
 );
 
 require_once('../../config/config.php');
