@@ -32,8 +32,11 @@ class OrderModel{
                 SELECT ski_order.order_number, 
                     ski_order.total_price, 
                     ski_order.reference_to_larger_order, 
-                    ski_order.customer_id
+                    ski_order.customer_id,
+                    ski_order_ski_type.ski_type_id,
+                    ski_order_ski_type.quantity
                 FROM `ski_order`
+                INNER JOIN ski_order_ski_type ON ski_order.order_number = ski_order_ski_type.order_id
                 WHERE ski_order.customer_id = :customer_id
             ';
 
@@ -41,7 +44,25 @@ class OrderModel{
         $stmt->bindValue(':customer_id', $customerId);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        $res = array();
+
+        // Reconstructs the result array to fit
+        // TODO: Refactor this 'function' as it is used twice.
+        while ($row = $stmt->fetch()){
+            $orderNumber = $row['order_number'];
+            if (!array_key_exists($orderNumber, $res)){
+                $res[$orderNumber] = array(array(
+                    'order_number'=>$orderNumber,
+                    'total_price'=>$row['total_price'],
+                    'reference_to_larger_order'=>$row['reference_to_larger_order'],
+                    'customer_id'=>$row['customer_id']),
+                    array()
+                );
+            }
+            array_push($res[$orderNumber][1], array('ski_type_id'=>$row['ski_type_id'], 'quantity'=>$row['quantity']));
+        }
+        $res = array_values($res);
+        return $res;
     }
 
     /**
@@ -229,11 +250,8 @@ class OrderModel{
                    ski_order.order_number, 
                    ski_order.total_price, 
                    ski_order.reference_to_larger_order, 
-                   ski_order.customer_id,
-                   ski_order_ski_type.ski_type_id,
-                   ski_order_ski_type.quantity   
+                   ski_order.customer_id 
             FROM ski_order
-            INNER JOIN ski_order_ski_type ON ski_order.order_number = ski_order_ski_type.order_id
             WHERE ski_order.order_number = :order_number
         ';
 
@@ -241,7 +259,21 @@ class OrderModel{
         $stmt->bindValue(':order_number', $orderId);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        $res1 = $stmt->fetchAll();
+
+        $query2 = '
+            SELECT ski_order_ski_type.ski_type_id, ski_order_ski_type.quantity 
+            FROM ski_order_ski_type 
+            WHERE ski_order_ski_type.order_id = :order_number
+        ';
+
+        $stmt = $this->db->prepare($query2);
+        $stmt->bindValue(':order_number', $orderId);
+        $stmt->execute();
+
+        $res2 = $stmt->fetchAll();
+
+        return array($res1, $res2);
     }
 
     /**
@@ -282,7 +314,24 @@ class OrderModel{
         $stmt->bindValue(':date', $date);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        $res = array();
+
+        // Reconstructs the result array to fit
+        while ($row = $stmt->fetch()){
+            $orderNumber = $row['order_number'];
+            if (!array_key_exists($orderNumber, $res)){
+                $res[$orderNumber] = array(array(
+                    'order_number'=>$orderNumber,
+                    'total_price'=>$row['total_price'],
+                    'reference_to_larger_order'=>$row['reference_to_larger_order'],
+                    'customer_id'=>$row['customer_id']),
+                    array()
+                );
+            }
+            array_push($res[$orderNumber][1], array('ski_type_id'=>$row['ski_type_id'], 'quantity'=>$row['quantity']));
+        }
+        $res = array_values($res);
+        return $res;
     }
 
     /**
@@ -290,7 +339,7 @@ class OrderModel{
      * @param string $searchState The state you want.
      * @return array An array of orders.
      */
-    public function getOrderBasedOnState(string $searchState): array{
+    public function getOrdersBasedOnState(string $searchState): array{
 
         // Selects all orders that matches the state.
         $query = '
@@ -311,7 +360,24 @@ class OrderModel{
         $stmt->bindValue(':search_state', $searchState);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        $res = array();
+
+        while ($row = $stmt->fetch()){
+            $orderNumber = $row['order_number'];
+            if (!array_key_exists($orderNumber, $res)){
+                $res[$orderNumber] = array(array(
+                    'order_number'=>$orderNumber,
+                    'total_price'=>$row['total_price'],
+                    'reference_to_larger_order'=>$row['reference_to_larger_order'],
+                    'customer_id'=>$row['customer_id']),
+                    array()
+                );
+            }
+            array_push($res[$orderNumber][1], array('ski_type_id'=>$row['ski_type_id'], 'quantity'=>$row['quantity']));
+        }
+        $res = array_values($res);
+        return $res;
+
     }
 
     /**
@@ -345,5 +411,16 @@ class OrderModel{
         $stmt->execute();
 
         return $stmt->fetchColumn(0);
+    }
+
+    public function addToOrder(int $orderId, int $skiTypeId, int $quantity){
+$query = 'INSERT INTO `ski_order_ski_type` (`order_id`, `ski_type_id`, `quantity`) VALUES (:order_number, :ski_type_id, :number_of_skis);';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':order_number', $orderId);
+        $stmt->bindValue(':ski_type_id', $skiTypeId);
+        $stmt->bindValue(':number_of_skis', $quantity);
+
+        $stmt->execute();
     }
 }
