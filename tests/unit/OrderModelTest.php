@@ -19,7 +19,7 @@ class SkiModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getAllOrdersForCustomer(1);
 
-        self::assertCount(13,$res);
+        self::assertCount(12,$res);
     }
 
     public function testChangeOrderState(){
@@ -48,5 +48,23 @@ class SkiModelTest extends \Codeception\Test\Unit{
         $res = $orderModel->getOrders('');
 
         self::assertCount(12, $res);
+    }
+
+    public function testGetOrder(){
+        $orderModel = new OrderModel();
+
+        $res = $orderModel->getOrder(1);
+
+        self::assertCount(12, $res);
+        self::assertEquals('250', $res[5]['quantity']);
+    }
+
+    public function testGetOrderBasedOnState(){
+        $orderModel = new OrderModel();
+
+        $res = $orderModel->getOrderBasedOnState('new');
+
+        self::assertCount(1, $res);
+        self::assertNotEquals('skis available', $res[5]['state']);
     }
 }

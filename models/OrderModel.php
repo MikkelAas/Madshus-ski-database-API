@@ -245,7 +245,7 @@ class OrderModel{
     }
 
     /**
-     * Retrieves an order
+     * Retrieves all orders.
      * @param $date
      * @return array an array of associative arrays of the form:
      *         array('order_number' => '...', 'total_price' => '...', 'state' => '...', ...), ...)), ...)
