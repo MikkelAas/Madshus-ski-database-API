@@ -413,8 +413,19 @@ class OrderModel{
         return $stmt->fetchColumn(0);
     }
 
+    /**
+     * Adds to an already existing order.
+     * @param int $orderId The order id that you want to add to.
+     * @param int $skiTypeId The id of the ski type that you want to add.
+     * @param int $quantity The number of skis you want.
+     */
     public function addToOrder(int $orderId, int $skiTypeId, int $quantity){
-$query = 'INSERT INTO `ski_order_ski_type` (`order_id`, `ski_type_id`, `quantity`) VALUES (:order_number, :ski_type_id, :number_of_skis);';
+
+        // Inserts into the ski order ski type table.
+        $query = '
+            INSERT INTO `ski_order_ski_type` (`order_id`, `ski_type_id`, `quantity`) 
+            VALUES (:order_number, :ski_type_id, :number_of_skis);
+        ';
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':order_number', $orderId);
