@@ -4,6 +4,7 @@
 // with the appropriate fields filled in.
 // This is to ensure that sensitive information is not present in the remote git repository.
 
+// The base path of the project
 set_include_path("");
 
 const config = array(
