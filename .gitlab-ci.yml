@@ -15,7 +15,9 @@ before_script:
   # Create test database
   - mysql -u root -e "CREATE DATABASE db_project"
   # Create config file
-  - echo "<?php
+  - echo "<?php  " > config/config_test.php
+  - echo "set_include_path('$(pwd)');" >> config/config_test.php
+  - echo "
 
     const config = array(
     'db_driver' => 'mysql',
@@ -25,7 +27,9 @@ before_script:
     'db_password' => '',
     'db_name' => 'db_project',
     'db_charset' => 'utf8mb4'
-    );" > config/config_test.php
+    );" >> config/config_test.php
+  # Print config file
+  - cat config/config_test.php
 
 # Test
 test:
