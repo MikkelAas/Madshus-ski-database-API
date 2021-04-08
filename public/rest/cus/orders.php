@@ -7,7 +7,7 @@ $orderModel = new OrderModel();
 
 switch ($method){
     case "GET":
-        if (array_key_exists(4, $pathParts) && is_int($pathParts[4])) {
+        if (array_key_exists(4, $pathParts) && is_numeric($pathParts[4])) {
             $res = $orderModel->getOrder($pathParts[4]);
         } else if(array_key_exists("since", $queries)){
             $res = $orderModel->getOrders($queries["since"]);
