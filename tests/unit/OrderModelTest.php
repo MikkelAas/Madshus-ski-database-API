@@ -8,8 +8,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
         $orderModel = new OrderModel();
 
         $res = $orderModel->getAllOrdersForCustomer(1);
-
-        var_dump($res);
+        
         self::assertCount(4, $res);
     }
 
