@@ -27,7 +27,7 @@ class PlanModel{
 
         $stmt = $this->db->prepare($query1);
         $stmt->execute();
-        
+
         $mostRecentDate = $stmt->fetchColumn(0);
 
         // Retrieves the start date, the ski type, and the amount for the current date.
@@ -42,21 +42,30 @@ class PlanModel{
         $stmt->bindValue(':date_now', $mostRecentDate);
         $stmt->execute();
 
-        $res = array();
+        $row = $stmt->fetch();
 
-        while ($row = $stmt->fetch()){
-            $mostRecentDate = $row['start_date'];
-            if (!array_key_exists($mostRecentDate, $res)){
-                $res[$mostRecentDate] = array(array(
-                    'start_date'=>$mostRecentDate,
-                    'ski_type_id'=>$row['ski_type_id'],
-                    'daily_amount'=>$row['daily_amount'],
-                    array()
-                ));
-            }
-            array_push($res[$mostRecentDate][1], array('ski_type_id'=>$row['ski_type_id'], 'daily_amount'=>$row['daily_amount']));
+        if (!$row) {
+            return [];
         }
 
-        return array_values($res);
+        $res = [
+            'start_date'=>$row['start_date'],
+            'planned_skis'=>[
+                [
+                    'ski_type_id'=>$row['ski_type_id'],
+                    'daily_amount'=>$row['daily_amount']
+                ]
+            ]
+        ];
+
+        while ($row = $stmt->fetch()){
+            array_push($res['planned_skis'],
+                [
+                    'ski_type_id'=>$row['ski_type_id'],
+                    'daily_amount'=>$row['daily_amount']
+                ]
+            );
+        }
+        return $res;
     }
 }
