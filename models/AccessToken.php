@@ -2,14 +2,25 @@
 
 require_once ('models/Privileges.php');
 
+/**
+ * Class AccessToken
+ * Model for getting access tokens from database
+ */
 class AccessToken {
 
     protected $db;
 
+    /**
+     * AccessToken constructor.
+     */
     public function __construct() {
         $this->db = require('db/pdo_connection.php');
     }
 
+    /**
+     * @param string $token access token to get privileges for
+     * @return mixed Privileges if token exists. false otherwise.
+     */
     function getPrivileges (string $token) : mixed {
         $query = "
             SELECT 
