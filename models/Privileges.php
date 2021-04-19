@@ -24,7 +24,7 @@ class Privileges {
         return $this->transporterAccess;
     }
 
-    function hasPrivileges (Privileges $requiredPrivileges) : bool {
+    function hasAccess (Privileges $requiredPrivileges) : bool {
         if ($requiredPrivileges->hasCompanyAccess() && !$this->hasCompanyAccess()) {
             return false;
         }

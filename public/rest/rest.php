@@ -39,7 +39,7 @@ foreach ($endpoints as $endpoint=>[$endpoint_path, $privileges]) {
         }
 
         // Check if access token has been granted the right privileges
-        if (!$tokenPrivileges->hasPrivileges($privileges)) {
+        if (!$tokenPrivileges->hasAccess($privileges)) {
             http_response_code(403);
             die(json_encode(["error"=>"Access token does not allow access to this endpoint"]));
         }
