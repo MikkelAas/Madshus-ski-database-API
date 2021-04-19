@@ -85,7 +85,7 @@ class OrderModel{
                     :reference_order,
                     :customer_id
                     );
-        ';
+            ';
 
             $stmt = $this->db->prepare($query1);
             $stmt->bindValue(':total_price', $totalPrice);
@@ -144,8 +144,6 @@ class OrderModel{
             $this->db->rollBack();
             echo "Failed: " . $e->getMessage();
         }
-
-
     }
 
     /**
