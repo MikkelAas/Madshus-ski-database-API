@@ -28,7 +28,7 @@ class PlanModel{
             SELECT production_plan.start_date, production_plan_ski.ski_type_id, production_plan_ski.daily_amount
             FROM production_plan
             INNER JOIN production_plan_ski ON production_plan.id = production_plan_ski.production_plan_id
-            WHERE production_plan.date = :date_now
+            WHERE production_plan.start_date = :date_now
         ';
 
         $stmt = $this->db->prepare($query);
@@ -38,10 +38,10 @@ class PlanModel{
         $res = array();
 
         while ($row = $stmt->fetch()){
-            $currentDate = $row['date'];
+            $currentDate = $row['start_date'];
             if (!array_key_exists($currentDate, $res)){
                 $res[$currentDate] = array(array(
-                    'date'=>$currentDate,
+                    'start_date'=>$currentDate,
                     'ski_type_id'=>$row['ski_type_id'],
                     'daily_amount'=>$row['daily_amount'],
                     array()
