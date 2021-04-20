@@ -79,7 +79,6 @@ class ShipmentModel {
       array_push($res[$shipmentNum][1], $row['order_num']);
     }
 
-    $res = array_values($res);
-    return $res;
+    return array_values($res);
   }
 }
