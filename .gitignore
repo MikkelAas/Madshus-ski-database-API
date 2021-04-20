@@ -1,5 +1,9 @@
 .idea/
 vendor/
+
 config/config.php
-config/test_config.php
+config/config_test.php
+api.suite.yml
+unit.suite.yml
+
 test_script.php

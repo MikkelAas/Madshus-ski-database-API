@@ -1,3 +1,6 @@
+# This is a template file
+# Copy this to api.suite.yml
+
 actor: ApiTester
 modules:
     enabled:
