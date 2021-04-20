@@ -398,11 +398,11 @@ class OrderModel{
     }
 
     /**
-     * Reformats the array.
-     * @param $stmt
-     * @return array Returns the reformated array.
+     * Reformats an array.
+     * @param PDOStatement $stmt Statement to get data from.
+     * @return array Returns the reformatted array.
      */
-    public function reformatArray($stmt): array
+    private function reformatArray(PDOStatement $stmt): array
     {
         $res = array();
 
@@ -419,7 +419,6 @@ class OrderModel{
             }
             array_push($res[$orderNumber][1], array('ski_type_id' => $row['ski_type_id'], 'quantity' => $row['quantity']));
         }
-        $res = array_values($res);
-        return $res;
+        return array_values($res);
     }
 }
