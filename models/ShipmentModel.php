@@ -28,10 +28,10 @@ class ShipmentModel {
 
   /**
    * Updates the state of an order
-   * @param $shipmentNum shipment number of the shipment to update
-   * @param $newState new state of the shipment
+   * @param int $shipmentNum shipment number of the shipment to update
+   * @param string $newState new state of the shipment
    */
-  function updateShipment($shipmentNum, $newState) {
+  function updateShipment(int $shipmentNum, string $newState) {
     $query = '
       UPDATE `shipment` 
       SET `state`= :newState
@@ -53,10 +53,10 @@ class ShipmentModel {
 
   /**
    * Reformat array to collect affiliated data
-   * @param $stmt statement to get the data from
+   * @param PDOStatement $stmt statement to get the data from
    * @return array newly formatted array
    */
-  private function reformatArray($stmt): array {
+  private function reformatArray(PDOStatement $stmt): array {
     $res = array();
 
     while ($row = $stmt->fetch()) {
