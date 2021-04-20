@@ -153,9 +153,6 @@ class OrderModel{
      * @param $employeeId
      */
     public function changeOrderState(int $orderId, string $newState, $employeeId){
-        try {
-            $this->db->beginTransaction();
-
             // Checks if the state message is valid.
             if ($newState != 'new' && $newState != 'open' && $newState != "skis available"){
                 throw new InvalidArgumentException("Invalid state.");
@@ -192,11 +189,9 @@ class OrderModel{
             $stmt->bindValue(':date_now', date("Y-m-d"));
             $stmt->execute();
 
-            $this->db->commit();
-        } catch (Exception $e){
-            $this->db->rollBack();
-            echo "Failed: " . $e->getMessage();
-        }
+            if ($stmt->rowCount() == 0){
+                throw new \http\Exception\InvalidArgumentException($orderId . " does not exist.");
+            }
     }
 
     /**
