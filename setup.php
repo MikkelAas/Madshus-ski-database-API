@@ -79,9 +79,15 @@ $configInfo = gatherConfigInfo();
 generateConfigFile("config/config.php", $configInfo);
 echo "\nconfig/config.php has been updated successfully\n\n";
 echo "--- EVERYTHING REGARDING PRODUCTION DATABASE HAS BEEN SETUP ---\n";
-echo "--- IF YOU DO NOT WISH TO SETUP LOCAL TESTING, YOU CAN TERMINATE THIS SCRIPT ---\n\n";
+echo "Would you like to configure local testing as well? (y/N): ";
 
-echo "Info regarding testing database (this can be skipped if you are not interested in testing locally):\n";
+$input = getInput();
+
+if (strtolower($input) !== "y") {
+    die();
+}
+
+echo "Info regarding testing database):\n";
 $configInfo = gatherConfigInfo();
 generateConfigFile("config/config_test.php", $configInfo);
 echo "\nconfig/config_test.php has been updated successfully\n";
