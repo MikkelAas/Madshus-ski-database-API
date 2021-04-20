@@ -48,6 +48,28 @@ function generateConfigFile (string $file, array $configInfo) {
     fclose($configFile);
 }
 
+function generateUnitYML (array $configInfo) {
+    $configString = sprintf("actor: UnitTester
+modules:
+    enabled:
+        - Db:
+            dsn: '%s:host=%s;dbname=%s'
+            user: '%s'
+            password: '%s'
+            dump: 'tests/_data/db.sql'
+            populate: true
+            cleanup: true
+            populator: 'mysql -u \$user -h \$host \$dbname < \$dump'
+        - Asserts
+        - \Helper\Unit
+    step_decorators: ~        
+", $configInfo['db_driver'], $configInfo['db_host'], $configInfo['db_name'], $configInfo['db_username'], $configInfo['db_password']);
+
+    $configFile = fopen("tests/unit.suite.yml", "w") or die("could not write to tests/unit.suite.yml");
+    fwrite($configFile, $configString);
+    fclose($configFile);
+}
+
 # Gather information and create config files
 echo "This setup script will setup the project for you, but before it can do that you need to provide some information\n";
 echo "Please fill in the information required in the terminal. 'Default' values (taken from template) are shown in parenthesis (), but you have to manually type the values you want\n";
@@ -62,4 +84,13 @@ echo "--- IF YOU DO NOT WISH TO SETUP LOCAL TESTING, YOU CAN TERMINATE THIS SCRI
 echo "Info regarding testing database (this can be skipped if you are not interested in testing locally):\n";
 $configInfo = gatherConfigInfo();
 generateConfigFile("config/config_test.php", $configInfo);
-echo "\nconfig/config_test.php has been updated successfully\n\n";
+echo "\nconfig/config_test.php has been updated successfully\n";
+
+generateUnitYML($configInfo);
+
+echo "tests/unit.suite.yml has been updated successfully\n";
+
+# For now, just copy the api.suite_template.yml file as there is nothing to configure here yet
+copy("tests/api.suite_template.yml", "tests/api.suite.yml");
+
+echo "tests/api.suite.yml has been updated successfully\n";
