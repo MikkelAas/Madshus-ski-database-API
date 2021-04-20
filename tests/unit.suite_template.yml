@@ -1,5 +1,6 @@
-# Codeception Test Suite Configuration
-#
+# This is a template file
+# Copy this to unit.suite.yml
+
 # Suite for unit or integration tests.
 
 actor: UnitTester

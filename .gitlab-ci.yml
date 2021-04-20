@@ -30,6 +30,11 @@ before_script:
     );" >> config/config_test.php
   # Print config file
   - cat config/config_test.php
+  # Copy template file for tests
+  - cp tests/api.suite_template.yml tests/api.suite.yml
+  - cp tests/unit.suite_template.yml tests/unit.suite.yml
+  # List files in tests directory
+  - ls tests/
 
 # Test
 test:
