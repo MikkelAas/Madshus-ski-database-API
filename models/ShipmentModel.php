@@ -27,6 +27,31 @@ class ShipmentModel {
   }
 
   /**
+   * Updates the state of an order
+   * @param $shipmentNum shipment number of the shipment to update
+   * @param $newState new state of the shipment
+   */
+  function updateShipment($shipmentNum, $newState) {
+    $query = '
+      UPDATE `shipment` 
+      SET `state`= :newState
+      WHERE `shipment_num` = :shipment_num
+    ';
+
+    $stmt = $this->db->prepare($query);
+    $stmt->bindValue(':shipment_num', $shipmentNum);
+    $stmt->bindValue(':newState', $newState);
+
+    $stmt->execute();
+
+    // if zero rows affected, throw exception
+    if ($stmt->rowCount() == 0) {
+      throw new \http\Exception\InvalidArgumentException($shipmentNum." does not exist!");
+    };
+
+  }
+
+  /**
    * Reformat array to collect affiliated data
    * @param $stmt statement to get the data from
    * @return array newly formatted array
