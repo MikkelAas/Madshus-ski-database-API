@@ -2,12 +2,11 @@
 -- version 5.0.4
 -- https://www.phpmyadmin.net/
 --
--- Host: db
--- Generation Time: May 06, 2021 at 09:41 AM
--- Server version: 8.0.22
--- PHP Version: 7.4.13
+-- Host: localhost
+-- Generation Time: Apr 21, 2021 at 01:34 PM
+-- Server version: 10.4.17-MariaDB
+-- PHP Version: 8.0.0
 
-SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -19,30 +18,8 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `idatg2204`
+-- Database: `db_project`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `access_token`
---
-
-DROP TABLE IF EXISTS `access_token`;
-CREATE TABLE `access_token` (
-  `token` varchar(50) NOT NULL,
-  `company_access` tinyint(1) NOT NULL,
-  `customer_access` tinyint(1) NOT NULL,
-  `transporter_access` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `access_token`
---
-
-INSERT INTO `access_token` (`token`, `company_access`, `customer_access`, `transporter_access`) VALUES
-('test-token', 1, 1, 1),
-('useless-token', 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -52,8 +29,8 @@ INSERT INTO `access_token` (`token`, `company_access`, `customer_access`, `trans
 
 DROP TABLE IF EXISTS `customer`;
 CREATE TABLE `customer` (
-  `id` int NOT NULL,
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -76,10 +53,10 @@ INSERT INTO `customer` (`id`, `name`, `start_date`, `end_date`) VALUES
 
 DROP TABLE IF EXISTS `employee`;
 CREATE TABLE `employee` (
-  `id` int NOT NULL,
-  `department` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `role` enum('Customer representative','Storekeeper','Production planner') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
+  `id` int(11) NOT NULL,
+  `department` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` enum('Customer representative','Storekeeper','Production planner') COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -97,9 +74,9 @@ INSERT INTO `employee` (`id`, `department`, `name`, `role`) VALUES
 
 DROP TABLE IF EXISTS `franchise`;
 CREATE TABLE `franchise` (
-  `id` int NOT NULL,
-  `shipping_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `negotiated_buying_price` int NOT NULL
+  `id` int(11) NOT NULL,
+  `shipping_address` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `negotiated_buying_price` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -117,9 +94,9 @@ INSERT INTO `franchise` (`id`, `shipping_address`, `negotiated_buying_price`) VA
 
 DROP TABLE IF EXISTS `individual_store`;
 CREATE TABLE `individual_store` (
-  `id` int NOT NULL,
-  `shipping_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `negotiated_buying_price` int NOT NULL
+  `id` int(11) NOT NULL,
+  `shipping_address` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `negotiated_buying_price` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -137,9 +114,9 @@ INSERT INTO `individual_store` (`id`, `shipping_address`, `negotiated_buying_pri
 
 DROP TABLE IF EXISTS `partner_stores`;
 CREATE TABLE `partner_stores` (
-  `id` int NOT NULL,
-  `franchise_id` int NOT NULL,
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
+  `id` int(11) NOT NULL,
+  `franchise_id` int(11) NOT NULL,
+  `name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -157,10 +134,10 @@ INSERT INTO `partner_stores` (`id`, `franchise_id`, `name`) VALUES
 
 DROP TABLE IF EXISTS `produced_skis`;
 CREATE TABLE `produced_skis` (
-  `prod_num` int NOT NULL,
+  `prod_num` int(11) NOT NULL,
   `prod_date` date NOT NULL,
-  `ski_type` int NOT NULL,
-  `order_id` int DEFAULT NULL
+  `ski_type` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -168,14 +145,11 @@ CREATE TABLE `produced_skis` (
 --
 
 INSERT INTO `produced_skis` (`prod_num`, `prod_date`, `ski_type`, `order_id`) VALUES
-(1, '2021-01-11', 2, 1),
-(2, '2021-01-05', 1, 10),
-(3, '2021-01-11', 1, 1),
-(4, '2020-12-21', 3, 10),
-(5, '2020-11-18', 2, 1),
-(6, '2021-04-26', 1, 1),
-(7, '2021-04-20', 1, 1),
-(8, '2021-04-05', 1, 1);
+(1, '2021-01-11', 2, NULL),
+(2, '2021-01-05', 1, NULL),
+(3, '2021-01-11', 1, NULL),
+(4, '2020-12-21', 3, NULL),
+(5, '2020-11-18', 2, NULL);
 
 -- --------------------------------------------------------
 
@@ -185,7 +159,7 @@ INSERT INTO `produced_skis` (`prod_num`, `prod_date`, `ski_type`, `order_id`) VA
 
 DROP TABLE IF EXISTS `production_plan`;
 CREATE TABLE `production_plan` (
-  `id` int NOT NULL,
+  `id` int(11) NOT NULL,
   `start_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -205,10 +179,10 @@ INSERT INTO `production_plan` (`id`, `start_date`) VALUES
 
 DROP TABLE IF EXISTS `production_plan_ski`;
 CREATE TABLE `production_plan_ski` (
-  `id` int NOT NULL,
-  `production_plan_id` int NOT NULL,
-  `ski_type_id` int NOT NULL,
-  `daily_amount` int NOT NULL
+  `id` int(11) NOT NULL,
+  `production_plan_id` int(11) NOT NULL,
+  `ski_type_id` int(11) NOT NULL,
+  `daily_amount` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -229,13 +203,13 @@ INSERT INTO `production_plan_ski` (`id`, `production_plan_id`, `ski_type_id`, `d
 
 DROP TABLE IF EXISTS `shipment`;
 CREATE TABLE `shipment` (
-  `shipment_num` int NOT NULL,
-  `store_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `shipping_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shipment_num` int(11) NOT NULL,
+  `store_name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shipping_address` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sched_pickup_date` date DEFAULT NULL,
-  `driver_id` int DEFAULT NULL,
-  `transport_company` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `state` enum('not ready','ready','picked up') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
+  `driver_id` int(11) DEFAULT NULL,
+  `transport_company` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` enum('not ready','ready','picked up') COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -254,9 +228,9 @@ INSERT INTO `shipment` (`shipment_num`, `store_name`, `shipping_address`, `sched
 
 DROP TABLE IF EXISTS `shipment_orders`;
 CREATE TABLE `shipment_orders` (
-  `id` int NOT NULL,
-  `shipment_num` int NOT NULL,
-  `order_num` int NOT NULL
+  `id` int(11) NOT NULL,
+  `shipment_num` int(11) NOT NULL,
+  `order_num` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -276,10 +250,10 @@ INSERT INTO `shipment_orders` (`id`, `shipment_num`, `order_num`) VALUES
 
 DROP TABLE IF EXISTS `ski_order`;
 CREATE TABLE `ski_order` (
-  `order_number` int NOT NULL,
-  `total_price` int NOT NULL,
-  `reference_to_larger_order` int DEFAULT NULL,
-  `customer_id` int NOT NULL
+  `order_number` int(11) NOT NULL,
+  `total_price` int(11) NOT NULL,
+  `reference_to_larger_order` int(11) DEFAULT NULL,
+  `customer_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -303,10 +277,10 @@ INSERT INTO `ski_order` (`order_number`, `total_price`, `reference_to_larger_ord
 
 DROP TABLE IF EXISTS `ski_order_ski_type`;
 CREATE TABLE `ski_order_ski_type` (
-  `id` int NOT NULL,
-  `order_id` int NOT NULL,
-  `ski_type_id` int NOT NULL,
-  `quantity` int NOT NULL
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `ski_type_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -332,11 +306,11 @@ INSERT INTO `ski_order_ski_type` (`id`, `order_id`, `ski_type_id`, `quantity`) V
 
 DROP TABLE IF EXISTS `ski_order_state_history`;
 CREATE TABLE `ski_order_state_history` (
-  `id` int NOT NULL,
-  `ski_order_id` int NOT NULL,
-  `employee_id` int DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `ski_order_id` int(11) NOT NULL,
+  `employee_id` int(11) DEFAULT NULL,
   `date` date NOT NULL,
-  `state` enum('new','open','skis available','ready to be shipped') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
+  `state` enum('new','open','skis available','ready to be shipped') COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -355,40 +329,22 @@ INSERT INTO `ski_order_state_history` (`id`, `ski_order_id`, `employee_id`, `dat
 -- --------------------------------------------------------
 
 --
--- Stand-in structure for view `ski_order_view`
--- (See below for the actual view)
---
-DROP VIEW IF EXISTS `ski_order_view`;
-CREATE TABLE `ski_order_view` (
-`order_number` int
-,`total_price` int
-,`reference_to_larger_order` int
-,`customer_id` int
-,`id` int
-,`order_id` int
-,`ski_type_id` int
-,`quantity` int
-);
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `ski_type`
 --
 
 DROP TABLE IF EXISTS `ski_type`;
 CREATE TABLE `ski_type` (
-  `id` int NOT NULL,
-  `model` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `temperature` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `grip_system` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `size` int NOT NULL,
-  `weight_class` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `model` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `temperature` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `grip_system` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `size` int(11) NOT NULL,
+  `weight_class` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `historical` tinyint(1) NOT NULL,
-  `url` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `msrp` int NOT NULL
+  `url` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `msrp` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -408,10 +364,10 @@ INSERT INTO `ski_type` (`id`, `model`, `type`, `temperature`, `grip_system`, `si
 
 DROP TABLE IF EXISTS `team_skier`;
 CREATE TABLE `team_skier` (
-  `id` int NOT NULL,
+  `id` int(11) NOT NULL,
   `dob` date NOT NULL,
-  `club` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `numer_of_skis_pr_year` int NOT NULL
+  `club` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `numer_of_skis_pr_year` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -420,40 +376,6 @@ CREATE TABLE `team_skier` (
 
 INSERT INTO `team_skier` (`id`, `dob`, `club`, `numer_of_skis_pr_year`) VALUES
 (2, '2021-04-07', 'Famileklubben', 50);
-
--- --------------------------------------------------------
-
---
--- Stand-in structure for view `whatever`
--- (See below for the actual view)
---
-DROP VIEW IF EXISTS `whatever`;
-CREATE TABLE `whatever` (
-`order_number` int
-,`total_price` int
-,`reference_to_larger_order` int
-,`customer_id` int
-);
-
--- --------------------------------------------------------
-
---
--- Structure for view `ski_order_view`
---
-DROP TABLE IF EXISTS `ski_order_view`;
-
-DROP VIEW IF EXISTS `ski_order_view`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`idatg2204`@`%` SQL SECURITY DEFINER VIEW `ski_order_view`  AS SELECT `ski_order`.`order_number` AS `order_number`, `ski_order`.`total_price` AS `total_price`, `ski_order`.`reference_to_larger_order` AS `reference_to_larger_order`, `ski_order`.`customer_id` AS `customer_id`, `ski_order_ski_type`.`id` AS `id`, `ski_order_ski_type`.`order_id` AS `order_id`, `ski_order_ski_type`.`ski_type_id` AS `ski_type_id`, `ski_order_ski_type`.`quantity` AS `quantity` FROM (`ski_order` join `ski_order_ski_type` on((`ski_order`.`order_number` = `ski_order_ski_type`.`order_id`))) ;
-
--- --------------------------------------------------------
-
---
--- Structure for view `whatever`
---
-DROP TABLE IF EXISTS `whatever`;
-
-DROP VIEW IF EXISTS `whatever`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`idatg2204`@`%` SQL SECURITY DEFINER VIEW `whatever`  AS SELECT `ski_order`.`order_number` AS `order_number`, `ski_order`.`total_price` AS `total_price`, `ski_order`.`reference_to_larger_order` AS `reference_to_larger_order`, `ski_order`.`customer_id` AS `customer_id` FROM `ski_order` ;
 
 --
 -- Indexes for dumped tables
@@ -570,73 +492,73 @@ ALTER TABLE `team_skier`
 -- AUTO_INCREMENT for table `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `employee`
 --
 ALTER TABLE `employee`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `partner_stores`
 --
 ALTER TABLE `partner_stores`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `produced_skis`
 --
 ALTER TABLE `produced_skis`
-  MODIFY `prod_num` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `prod_num` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `production_plan`
 --
 ALTER TABLE `production_plan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `production_plan_ski`
 --
 ALTER TABLE `production_plan_ski`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `shipment`
 --
 ALTER TABLE `shipment`
-  MODIFY `shipment_num` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `shipment_num` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `shipment_orders`
 --
 ALTER TABLE `shipment_orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `ski_order`
 --
 ALTER TABLE `ski_order`
-  MODIFY `order_number` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `order_number` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `ski_order_ski_type`
 --
 ALTER TABLE `ski_order_ski_type`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `ski_order_state_history`
 --
 ALTER TABLE `ski_order_state_history`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `ski_type`
 --
 ALTER TABLE `ski_type`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
@@ -707,7 +629,6 @@ ALTER TABLE `ski_order_state_history`
 --
 ALTER TABLE `team_skier`
   ADD CONSTRAINT `customer_team_skier_constraint` FOREIGN KEY (`id`) REFERENCES `customer` (`id`);
-SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
