@@ -44,25 +44,7 @@ class OrderModel{
         $stmt->bindValue(':customer_id', $customerId);
         $stmt->execute();
 
-        $res = array();
-
-        // Reconstructs the result array to fit
-        // TODO: Refactor this 'function' as it is used twice.
-        while ($row = $stmt->fetch()){
-            $orderNumber = $row['order_number'];
-            if (!array_key_exists($orderNumber, $res)){
-                $res[$orderNumber] = array(array(
-                    'order_number'=>$orderNumber,
-                    'total_price'=>$row['total_price'],
-                    'reference_to_larger_order'=>$row['reference_to_larger_order'],
-                    'customer_id'=>$row['customer_id']),
-                    array()
-                );
-            }
-            array_push($res[$orderNumber][1], array('ski_type_id'=>$row['ski_type_id'], 'quantity'=>$row['quantity']));
-        }
-        $res = array_values($res);
-        return $res;
+        return $this->reformatArray($stmt);
     }
 
     /**
@@ -83,14 +65,16 @@ class OrderModel{
         $employeeId,
         int $skipTypeId,
         int $quantity){
+        try {
+            $this->db->beginTransaction();
 
-        // Checks if the state message is valid.
-        if ($stateMessage != 'new' && $stateMessage != 'open' && $stateMessage != "skis available"){
-            throw new InvalidArgumentException("Invalid state.");
-        }
+            // Checks if the state message is valid.
+            if ($stateMessage != 'new' && $stateMessage != 'open' && $stateMessage != "skis available"){
+                throw new InvalidArgumentException("Invalid state.");
+            }
 
-        // Inserts a new ski order entry.
-        $query1 = '
+            // Inserts a new ski order entry.
+            $query1 = '
                 INSERT INTO `ski_order` ( 
                             `total_price`, 
                             `reference_to_larger_order`,
@@ -101,28 +85,28 @@ class OrderModel{
                     :reference_order,
                     :customer_id
                     );
-        ';
+            ';
 
-        $stmt = $this->db->prepare($query1);
-        $stmt->bindValue(':total_price', $totalPrice);
-        $stmt->bindValue(':reference_order', $refToLargerOrder);
-        $stmt->bindValue(':customer_id', $customerId);
-        $stmt->execute();
+            $stmt = $this->db->prepare($query1);
+            $stmt->bindValue(':total_price', $totalPrice);
+            $stmt->bindValue(':reference_order', $refToLargerOrder);
+            $stmt->bindValue(':customer_id', $customerId);
+            $stmt->execute();
 
-        // Selects the highest ID. Not ideal, but it is what it is.
-        // TODO: Find a way to save the newly inserted id. Perhaps find another way to store id.
-        $query2 = '
+            // Selects the highest ID. Not ideal, but it is what it is.
+            // TODO: Find a way to save the newly inserted id. Perhaps find another way to store id.
+            $query2 = '
             SELECT MAX(ski_order.order_number) 
             FROM ski_order
         ';
 
-        $stmt = $this->db->prepare($query2);
-        $stmt->execute();
+            $stmt = $this->db->prepare($query2);
+            $stmt->execute();
 
-        $orderId = (int)$stmt->fetchColumn(0);
+            $orderId = (int)$stmt->fetchColumn(0);
 
-        // Inserts a new entry in the ski order state history.
-        $query3 = '
+            // Inserts a new entry in the ski order state history.
+            $query3 = '
             INSERT INTO `ski_order_state_history` (`ski_order_id`, `employee_id`, `state`, `date`) 
             VALUES (  
                 :order_id,
@@ -132,14 +116,14 @@ class OrderModel{
             )
         ';
 
-        $stmt = $this->db->prepare($query3);
-        $stmt->bindValue(':order_id', $orderId);
-        $stmt->bindValue('employee_id', $employeeId);
-        $stmt->bindValue(':state_message', $stateMessage);
-        $stmt->bindValue(':date_now', date("Y-m-d"));
-        $stmt->execute();
+            $stmt = $this->db->prepare($query3);
+            $stmt->bindValue(':order_id', $orderId);
+            $stmt->bindValue('employee_id', $employeeId);
+            $stmt->bindValue(':state_message', $stateMessage);
+            $stmt->bindValue(':date_now', date("Y-m-d"));
+            $stmt->execute();
 
-        $query4 = '
+            $query4 = '
             INSERT INTO `ski_order_ski_type` (`id`, `order_id`, `ski_type_id`, `quantity`) 
             VALUES (
                 NULL,
@@ -149,12 +133,17 @@ class OrderModel{
             );
         ';
 
-        $stmt = $this->db->prepare($query4);
-        $stmt->bindValue(':order_number', $orderId);
-        $stmt->bindValue(':ski_type_id', $skipTypeId);
-        $stmt->bindValue(':number_of_skis', $quantity);
-        $stmt->execute();
+            $stmt = $this->db->prepare($query4);
+            $stmt->bindValue(':order_number', $orderId);
+            $stmt->bindValue(':ski_type_id', $skipTypeId);
+            $stmt->bindValue(':number_of_skis', $quantity);
+            $stmt->execute();
 
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            echo "Failed: " . $e->getMessage();
+        }
     }
 
     /**
@@ -164,28 +153,27 @@ class OrderModel{
      * @param $employeeId
      */
     public function changeOrderState(int $orderId, string $newState, $employeeId){
+            // Checks if the state message is valid.
+            if ($newState != 'new' && $newState != 'open' && $newState != "skis available"){
+                throw new InvalidArgumentException("Invalid state.");
+            }
 
-        // Checks if the state message is valid.
-        if ($newState != 'new' && $newState != 'open' && $newState != "skis available"){
-            throw new InvalidArgumentException("Invalid state.");
-        }
-
-        // Selects the id, and the ski order id where the order id matches.
-        $query1 = '
+            // Selects the id, and the ski order id where the order id matches.
+            $query1 = '
             SELECT id, ski_order_id 
             FROM ski_order_state_history 
             WHERE ski_order_state_history.`ski_order_id` = :order_id
         ';
 
-        $stmt = $this->db->prepare($query1);
-        $stmt->bindValue(':order_id', $orderId);
-        $stmt->execute();
+            $stmt = $this->db->prepare($query1);
+            $stmt->bindValue(':order_id', $orderId);
+            $stmt->execute();
 
-        // Saves the original order number and ski order number in two variables
-        $originalSkiOrderId = (int)$stmt->fetchColumn(1);
+            // Saves the original order number and ski order number in two variables
+            $originalSkiOrderId = (int)$stmt->fetchColumn(1);
 
-        // Inserts a new entry in the ski order state history table with the same order number.
-        $query2 = '
+            // Inserts a new entry in the ski order state history table with the same order number.
+            $query2 = '
             INSERT INTO `ski_order_state_history` (`ski_order_id`, `employee_id`, `state`, `date`)
             VALUES (
                 :original_ski_order_id,
@@ -194,12 +182,16 @@ class OrderModel{
                 :date_now)
         ';
 
-        $stmt = $this->db->prepare($query2);
-        $stmt->bindValue(':original_ski_order_id', $originalSkiOrderId);
-        $stmt->bindValue(':employee_id', $employeeId);
-        $stmt->bindValue(':new_state', $newState);
-        $stmt->bindValue(':date_now', date("Y-m-d"));
-        $stmt->execute();
+            $stmt = $this->db->prepare($query2);
+            $stmt->bindValue(':original_ski_order_id', $originalSkiOrderId);
+            $stmt->bindValue(':employee_id', $employeeId);
+            $stmt->bindValue(':new_state', $newState);
+            $stmt->bindValue(':date_now', date("Y-m-d"));
+            $stmt->execute();
+
+            if ($stmt->rowCount() == 0){
+                throw new \http\Exception\InvalidArgumentException($orderId . " does not exist.");
+            }
     }
 
     /**
@@ -207,36 +199,43 @@ class OrderModel{
      * @param int $orderId The id of the order that will be deleted.
      */
     public function deleteOrder(int $orderId){
-
-        // Deletes all history of an order from the ski order history table.
-        $query1 = '
+        try {
+            $this->db->beginTransaction();
+            // Deletes all history of an order from the ski order history table.
+            $query1 = '
             DELETE FROM ski_order_state_history
             WHERE ski_order_id = :order_number
         ';
 
-        $stmt = $this->db->prepare($query1);
-        $stmt->bindValue(':order_number', $orderId);
-        $stmt->execute();
+            $stmt = $this->db->prepare($query1);
+            $stmt->bindValue(':order_number', $orderId);
+            $stmt->execute();
 
-        // Deletes an entry from the ski order ski type table.
-        $query2 = '
+            // Deletes an entry from the ski order ski type table.
+            $query2 = '
             DELETE FROM ski_order_ski_type
             WHERE ski_order_ski_type.order_id = :order_number
         ';
 
-        $stmt = $this->db->prepare($query2);
-        $stmt->bindValue(':order_number', $orderId);
-        $stmt->execute();
+            $stmt = $this->db->prepare($query2);
+            $stmt->bindValue(':order_number', $orderId);
+            $stmt->execute();
 
-        // Deletes an entry from the ski order table.
-        $query3 = '
+            // Deletes an entry from the ski order table.
+            $query3 = '
             DELETE FROM ski_order
             WHERE ski_order.order_number = :order_number
         ';
 
-        $stmt = $this->db->prepare($query3);
-        $stmt->bindValue(':order_number',$orderId);
-        $stmt->execute();
+            $stmt = $this->db->prepare($query3);
+            $stmt->bindValue(':order_number',$orderId);
+            $stmt->execute();
+
+            $this->db->commit();
+        } catch(Exception $e){
+            $this->db->rollBack();
+            echo "Failed: " . $e->getMessage();
+        }
     }
 
     /**
@@ -262,23 +261,7 @@ class OrderModel{
         $stmt->bindValue(':order_number', $orderId);
         $stmt->execute();
 
-        $res = array();
-
-        while ($row = $stmt->fetch()){
-            $orderNumber = $row['order_number'];
-            if (!array_key_exists($orderNumber, $res)){
-                $res[$orderNumber] = array(array(
-                    'order_number'=>$orderNumber,
-                    'total_price'=>$row['total_price'],
-                    'reference_to_larger_order'=>$row['reference_to_larger_order'],
-                    'customer_id'=>$row['customer_id']),
-                    array()
-                );
-            }
-            array_push($res[$orderNumber][1], array('ski_type_id'=>$row['ski_type_id'], 'quantity'=>$row['quantity']));
-        }
-        $res = array_values($res);
-        return $res;
+        return $this->reformatArray($stmt);
     }
 
     /**
@@ -319,24 +302,7 @@ class OrderModel{
         $stmt->bindValue(':date', $date);
         $stmt->execute();
 
-        $res = array();
-
-        // Reconstructs the result array to fit
-        while ($row = $stmt->fetch()){
-            $orderNumber = $row['order_number'];
-            if (!array_key_exists($orderNumber, $res)){
-                $res[$orderNumber] = array(array(
-                    'order_number'=>$orderNumber,
-                    'total_price'=>$row['total_price'],
-                    'reference_to_larger_order'=>$row['reference_to_larger_order'],
-                    'customer_id'=>$row['customer_id']),
-                    array()
-                );
-            }
-            array_push($res[$orderNumber][1], array('ski_type_id'=>$row['ski_type_id'], 'quantity'=>$row['quantity']));
-        }
-        $res = array_values($res);
-        return $res;
+        return $this->reformatArray($stmt);
     }
 
     /**
@@ -365,23 +331,7 @@ class OrderModel{
         $stmt->bindValue(':search_state', $searchState);
         $stmt->execute();
 
-        $res = array();
-
-        while ($row = $stmt->fetch()){
-            $orderNumber = $row['order_number'];
-            if (!array_key_exists($orderNumber, $res)){
-                $res[$orderNumber] = array(array(
-                    'order_number'=>$orderNumber,
-                    'total_price'=>$row['total_price'],
-                    'reference_to_larger_order'=>$row['reference_to_larger_order'],
-                    'customer_id'=>$row['customer_id']),
-                    array()
-                );
-            }
-            array_push($res[$orderNumber][1], array('ski_type_id'=>$row['ski_type_id'], 'quantity'=>$row['quantity']));
-        }
-        $res = array_values($res);
-        return $res;
+        return $this->reformatArray($stmt);
     }
 
     /**
@@ -424,18 +374,51 @@ class OrderModel{
      * @param int $quantity The number of skis you want.
      */
     public function addToOrder(int $orderId, int $skiTypeId, int $quantity){
+        try {
+            $this->db->beginTransaction();
 
-        // Inserts into the ski order ski type table.
-        $query = '
+            // Inserts into the ski order ski type table.
+            $query = '
             INSERT INTO `ski_order_ski_type` (`order_id`, `ski_type_id`, `quantity`) 
             VALUES (:order_number, :ski_type_id, :number_of_skis);
         ';
 
-        $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':order_number', $orderId);
-        $stmt->bindValue(':ski_type_id', $skiTypeId);
-        $stmt->bindValue(':number_of_skis', $quantity);
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':order_number', $orderId);
+            $stmt->bindValue(':ski_type_id', $skiTypeId);
+            $stmt->bindValue(':number_of_skis', $quantity);
 
-        $stmt->execute();
+            $stmt->execute();
+
+            $this->db->commit();
+        } catch (Exception $e){
+            $this->db->rollBack();
+            echo "Failed: " . $e->getMessage();
+        }
+    }
+
+    /**
+     * Reformats an array.
+     * @param PDOStatement $stmt Statement to get data from.
+     * @return array Returns the reformatted array.
+     */
+    private function reformatArray(PDOStatement $stmt): array
+    {
+        $res = array();
+
+        while ($row = $stmt->fetch()) {
+            $orderNumber = $row['order_number'];
+            if (!array_key_exists($orderNumber, $res)) {
+                $res[$orderNumber] = array(array(
+                    'order_number' => $orderNumber,
+                    'total_price' => $row['total_price'],
+                    'reference_to_larger_order' => $row['reference_to_larger_order'],
+                    'customer_id' => $row['customer_id']),
+                    array()
+                );
+            }
+            array_push($res[$orderNumber][1], array('ski_type_id' => $row['ski_type_id'], 'quantity' => $row['quantity']));
+        }
+        return array_values($res);
     }
 }
