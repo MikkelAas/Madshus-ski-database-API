@@ -32,7 +32,7 @@ class ShipmentModel {
    */
   function createShipmentRequest(array $orderIds) {
     if (sizeof($orderIds) == 0) {
-      throw new \http\Exception\InvalidArgumentException("no order ids provided");
+      throw new \InvalidArgumentException("no order ids provided");
     }
 
     try {
