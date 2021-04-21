@@ -9,7 +9,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getAllOrdersForCustomer(1);
         
-        self::assertCount(4, $res);
+        self::assertCount(7, $res);
     }
 
     public function testCreateOrder(){
@@ -27,7 +27,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getAllOrdersForCustomer(1);
 
-        self::assertCount(5,$res);
+        self::assertCount(8,$res);
     }
 
     public function testChangeOrderState(){
@@ -43,11 +43,11 @@ class OrderModelTest extends \Codeception\Test\Unit{
     public function testDeleteOrder(){
         $orderModel = new OrderModel();
 
-        $orderModel->deleteOrder(1);
+        $orderModel->deleteOrder(13);
 
         $res = $orderModel->getAllOrdersForCustomer(1);
 
-        self::assertCount(3, $res);
+        self::assertCount(6, $res);
     }
 
     public function testGetOrders(){
@@ -56,7 +56,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
         $res1 = $orderModel->getOrders('');
         $res2 = $orderModel->getOrders('2021-04-15');
 
-        self::assertCount(4, $res1);
+        self::assertCount(7, $res1);
         self::assertCount(1, $res2);
     }
 
@@ -73,7 +73,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getOrdersBasedOnState('new');
 
-        self::assertCount(3, $res);
+        self::assertCount(7, $res);
     }
 
     public function testAddToOrder(){
