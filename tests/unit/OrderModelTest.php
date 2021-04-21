@@ -2,7 +2,6 @@
 require_once('config/config_test.php');
 require('models/OrderModel.php');
 
-// TODO: Find out why the database doesn't reset.
 class OrderModelTest extends \Codeception\Test\Unit{
 
     /**
@@ -31,9 +30,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
             250
         );
 
-        $res = $orderModel->getAllOrdersForCustomer(1);
-
-        self::assertCount(8,$res);
+        $this->tester->seeNumRecords(8, 'ski_order');
     }
 
     public function testChangeOrderState(){
