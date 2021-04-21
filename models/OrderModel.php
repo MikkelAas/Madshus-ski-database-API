@@ -394,6 +394,28 @@ class OrderModel{
     }
 
     /**
+     * Changes the quantity of an existing ski type in an order.
+     * @param int $id The id of the ski order ski type.
+     * @param int $quantity The new quantity.
+     */
+    public function changeQuantity(int $id, int $quantity){
+
+        print ("Before");
+        $query = '
+            UPDATE `ski_order_ski_type` 
+            SET `quantity` = :new_quantity 
+            WHERE `ski_order_ski_type`.`id` = :ski_order_ski_type_id
+        ';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':ski_order_ski_type_id', $id);
+        $stmt->bindValue(':new_quantity', $quantity);
+        $stmt->execute();
+
+        print ("After");
+    }
+
+    /**
      * Reformats an array.
      * @param PDOStatement $stmt Statement to get data from.
      * @return array Returns the reformatted array.
