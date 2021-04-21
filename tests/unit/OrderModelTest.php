@@ -4,6 +4,12 @@ require('models/OrderModel.php');
 
 // TODO: Find out why the database doesn't reset.
 class OrderModelTest extends \Codeception\Test\Unit{
+
+    /**
+     * @var UnitTester
+     */
+    protected UnitTester $tester;
+
     public function testGetAllOrdersForCustomer(){
         $orderModel = new OrderModel();
 
@@ -90,5 +96,19 @@ class OrderModelTest extends \Codeception\Test\Unit{
         $res = $orderModel->getOrder(1);
 
         self::assertCount(2, $res[0]['skis']);
+    }
+
+    public function testChangeQuantity(){
+        $orderModel = new OrderModel();
+
+        $orderModel->changeQuantity(13, 5001);
+
+        $this->tester->seeInDatabase(
+            'ski_order_ski_type',
+            [
+                'ski_order_ski_type.id' => 13,
+                'ski_order_ski_type.quantity' => 5001
+            ]
+        );
     }
 }
