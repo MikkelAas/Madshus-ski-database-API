@@ -394,6 +394,33 @@ class OrderModel{
     }
 
     /**
+     * Calculates the number of unfilled skis.
+     * @param int $id The id of the ski type.
+     * @return int Returns the number of unfilled skis.
+     */
+    public function getUnfilledSkis(int $id): int{
+        $query1 = 'SELECT COUNT(*) FROM `produced_skis` WHERE ski_type = :ski_type_id';
+
+        $stmt = $this->db->prepare($query1);
+        $stmt->bindValue(':ski_type_id', $id);
+        $stmt->execute();
+        $producedSkis = $stmt->fetchColumn(0);
+
+        $query2 = '
+            SELECT SUM(ski_order_ski_type.quantity) 
+            FROM `ski_order_ski_type` 
+            WHERE ski_order_ski_type.ski_type_id = :ski_type_id
+        ';
+
+        $stmt = $this->db->prepare($query2);
+        $stmt->bindValue(':ski_type_id', $id);
+        $stmt->execute();
+        $orderedSkis = $stmt->fetchColumn(0);
+
+        return $orderedSkis - $producedSkis;
+    }
+
+    /**
      * Changes the quantity of an existing ski type in an order.
      * @param int $id The id of the ski order ski type.
      * @param int $quantity The new quantity.
