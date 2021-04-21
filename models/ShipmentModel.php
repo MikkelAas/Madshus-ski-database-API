@@ -27,6 +27,57 @@ class ShipmentModel {
   }
 
   /**
+   * Function for creating a shipment request
+   * @param array $orderIds id of orders to put in shipment
+   */
+  function createShipmentRequest(array $orderIds) {
+    if (sizeof($orderIds) == 0) {
+      throw new \http\Exception\InvalidArgumentException("no order ids provided");
+    }
+
+    try {
+      $this->db->beginTransaction();
+
+      $query1 = '
+        INSERT INTO `shipment` (`state`) 
+        VALUES ("not ready")
+      ';
+
+      $stmt = $this->db->prepare($query1);
+      $stmt->execute();
+
+      // Gets the highest ID to get the newest shipment (hopefully the current one)
+      // Not a great solution but will have to do for now
+      $query2 = '
+        SELECT MAX(`shipment`.`shipment_num`) 
+        FROM `shipment`
+      ';
+
+      $stmt = $this->db->prepare($query2);
+      $stmt->execute();
+
+      $shipmentNum = (int)$stmt->fetchColumn(0);
+
+      foreach ($orderIds as $orderId) {
+        $query3 = '
+          INSERT INTO `shipment_orders` (`id`, `shipment_num`, `order_num`) 
+          VALUES (NULL, :shipment_num, :order_num)
+        ';
+
+        $stmt = $this->db->prepare($query3);
+        $stmt->bindValue(':shipment_num', $shipmentNum);
+        $stmt->bindValue(':order_num', $orderId);
+        $stmt->execute();
+      }
+
+      $this->db->commit();
+    }  catch (Exception $e) {
+      $this->db->rollBack();
+      echo ":( Failed: " . $e->getMessage();
+    }
+  }
+
+  /**
    * Updates the state of an order
    * @param int $shipmentNum shipment number of the shipment to update
    * @param string $newState new state of the shipment
