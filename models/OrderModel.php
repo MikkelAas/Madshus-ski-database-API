@@ -398,11 +398,16 @@ class OrderModel{
      * @param int $id The id of the ski type.
      * @return int Returns the number of unfilled skis.
      */
-    public function getUnfilledSkis(int $id): int{
-        $query1 = 'SELECT COUNT(*) FROM `produced_skis` WHERE ski_type = :ski_type_id';
+    public function getUnfilledSkis(int $skiTypeId, int $orderId): int{
+        $query1 = '
+            SELECT COUNT(*) 
+            FROM `produced_skis` 
+            WHERE produced_skis.ski_type = :ski_type_id AND produced_skis.order_id = :order_number OR produced_skis.order_id IS NULL
+        ';
 
         $stmt = $this->db->prepare($query1);
-        $stmt->bindValue(':ski_type_id', $id);
+        $stmt->bindValue(':ski_type_id', $skiTypeId);
+        $stmt->bindValue(':order_number', $orderId);
         $stmt->execute();
         $producedSkis = $stmt->fetchColumn(0);
 
@@ -413,7 +418,7 @@ class OrderModel{
         ';
 
         $stmt = $this->db->prepare($query2);
-        $stmt->bindValue(':ski_type_id', $id);
+        $stmt->bindValue(':ski_type_id', $skiTypeId);
         $stmt->execute();
         $orderedSkis = $stmt->fetchColumn(0);
 
@@ -427,7 +432,6 @@ class OrderModel{
      */
     public function changeQuantity(int $id, int $quantity){
 
-        print ("Before");
         $query = '
             UPDATE `ski_order_ski_type` 
             SET `quantity` = :new_quantity 
