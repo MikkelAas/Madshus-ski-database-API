@@ -394,6 +394,33 @@ class OrderModel{
     }
 
     /**
+     * Assigns an order number to a produced ski for an x number of skis where the order number was null.
+     * @param int $skiTypeId The ski type id.
+     * @param int $orderId The order number.
+     * @param int $numberOfSkis The number of skis that is to be updated.
+     */
+    public function assignProducedSki(int $skiTypeId, int $orderId, int $numberOfSkis){
+
+        $query = '
+            UPDATE `produced_skis` 
+            SET `order_id` = :order_number 
+            WHERE produced_skis.ski_type = :ski_type_id AND produced_skis.order_id IS NULL 
+            LIMIT :number_of_skis
+        ';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':order_number', $orderId);
+        $stmt->bindValue(':ski_type_id', $skiTypeId);
+        // Bind value could be unnecessary here since the value will be computed by the getUnfilledSkis function
+        // However, the function becomes more flexible ...
+        $stmt->bindValue(':number_of_skis', $numberOfSkis);
+        $stmt->bindValue();
+
+        $stmt->execute();
+    }
+
+
+    /**
      * Calculates the number of unfilled skis.
      * @param int $skiTypeId The id of the ski type.
      * @param int $orderId The id of the order.
