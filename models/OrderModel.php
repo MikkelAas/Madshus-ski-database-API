@@ -395,7 +395,8 @@ class OrderModel{
 
     /**
      * Calculates the number of unfilled skis.
-     * @param int $id The id of the ski type.
+     * @param int $skiTypeId The id of the ski type.
+     * @param int $orderId The id of the order.
      * @return int Returns the number of unfilled skis.
      */
     public function getUnfilledSkis(int $skiTypeId, int $orderId): int{
