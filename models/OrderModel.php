@@ -405,15 +405,15 @@ class OrderModel{
         while ($row = $stmt->fetch()) {
             $orderNumber = $row['order_number'];
             if (!array_key_exists($orderNumber, $res)) {
-                $res[$orderNumber] = array(array(
+                $res[$orderNumber] = array(
                     'order_number' => $orderNumber,
                     'total_price' => $row['total_price'],
                     'reference_to_larger_order' => $row['reference_to_larger_order'],
-                    'customer_id' => $row['customer_id']),
-                    array()
+                    'customer_id' => $row['customer_id'],
+                    'skis' => array()
                 );
             }
-            array_push($res[$orderNumber][1], array('ski_type_id' => $row['ski_type_id'], 'quantity' => $row['quantity']));
+            array_push($res[$orderNumber]["skis"], array('ski_type_id' => $row['ski_type_id'], 'quantity' => $row['quantity']));
         }
         return array_values($res);
     }
