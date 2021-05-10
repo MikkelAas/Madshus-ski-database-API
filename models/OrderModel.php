@@ -26,18 +26,16 @@ class OrderModel{
      *         array('order_number' => '...', 'total_price' => '...', 'state' => '...', ...), ...)), ...)
      */
     public function getAllOrdersForCustomer(int $customerId): array{
-
         // This query selects everything from ski_order where the customer id matches.
         $query = '
-                SELECT ski_order.order_number, 
-                    ski_order.total_price, 
-                    ski_order.reference_to_larger_order, 
-                    ski_order.customer_id,
-                    ski_order_ski_type.ski_type_id,
-                    ski_order_ski_type.quantity
-                FROM `ski_order`
-                INNER JOIN ski_order_ski_type ON ski_order.order_number = ski_order_ski_type.order_id
-                WHERE ski_order.customer_id = :customer_id
+                SELECT ski_order_view.order_number, 
+                    ski_order_view.total_price, 
+                    ski_order_view.reference_to_larger_order, 
+                    ski_order_view.customer_id,
+                    ski_order_view.ski_type_id,
+                    ski_order_view.quantity
+                FROM ski_order_view
+                WHERE ski_order_view.customer_id = :customer_id
             ';
 
         $stmt = $this->db->prepare($query);
@@ -274,14 +272,13 @@ class OrderModel{
 
         // Selects every over from the ski order table, and the ski type id and the quantity.
         $query = '
-                SELECT ski_order.order_number, 
-                    ski_order.total_price, 
-                    ski_order.reference_to_larger_order, 
-                    ski_order.customer_id,
-                    ski_order_ski_type.ski_type_id,
-                    ski_order_ski_type.quantity
-                FROM `ski_order`
-                INNER JOIN ski_order_ski_type ON ski_order.order_number = ski_order_ski_type.order_id
+                SELECT ski_order_view.order_number, 
+                    ski_order_view.total_price, 
+                    ski_order_view.reference_to_larger_order, 
+                    ski_order_view.customer_id,
+                    ski_order_view.ski_type_id,
+                    ski_order_view.quantity
+                FROM ski_order_view
                 %s
             ';
 
@@ -293,7 +290,7 @@ class OrderModel{
         else {
             $query = sprintf($query, ' 
             INNER JOIN ski_order_state_history 
-            ON ski_order.order_number = ski_order_state_history.ski_order_id
+            ON ski_order_view.order_number = ski_order_state_history.ski_order_id
             WHERE
             ski_order_state_history.date >= :date');
         }
@@ -315,15 +312,14 @@ class OrderModel{
         // Selects all orders that matches the state.
         $query = '
             SELECT 
-                   ski_order.order_number, 
-                   ski_order.total_price, 
-                   ski_order.reference_to_larger_order, 
-                   ski_order.customer_id,
-                   ski_order_ski_type.ski_type_id,
-                   ski_order_ski_type.quantity   
-            FROM ski_order
-            INNER JOIN ski_order_ski_type ON ski_order.order_number = ski_order_ski_type.order_id
-            INNER JOIN ski_order_state_history ON ski_order_ski_type.order_id = ski_order_state_history.ski_order_id
+                   ski_order_view.order_number, 
+                   ski_order_view.total_price, 
+                   ski_order_view.reference_to_larger_order, 
+                   ski_order_view.customer_id,
+                   ski_order_view.ski_type_id,
+                   ski_order_view.quantity   
+            FROM ski_order_view
+            INNER JOIN ski_order_state_history ON ski_order_view.order_id = ski_order_state_history.ski_order_id
             WHERE ski_order_state_history.state = :search_state
         ';
 
