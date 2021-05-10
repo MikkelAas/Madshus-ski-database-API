@@ -50,14 +50,20 @@ class OrderModelTest extends \Codeception\Test\Unit{
         self::assertCount(6, $res);
     }
 
-    public function testGetOrders(){
+    public function testGetOrdersNoDate(){
         $orderModel = new OrderModel();
 
         $res1 = $orderModel->getOrders('');
-        $res2 = $orderModel->getOrders('2021-04-15');
 
         self::assertCount(7, $res1);
-        self::assertCount(1, $res2);
+    }
+
+    public function testGetOrdersWithDate(){
+        $orderModel = new OrderModel();
+
+        $res = $orderModel->getOrders('2021-04-15');
+
+        self::assertCount(1, $res);
     }
 
     public function testGetOrder(){

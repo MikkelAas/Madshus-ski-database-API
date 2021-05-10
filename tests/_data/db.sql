@@ -3,10 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Apr 21, 2021 at 12:16 PM
+-- Generation Time: May 06, 2021 at 09:41 AM
 -- Server version: 8.0.22
 -- PHP Version: 7.4.13
 
+SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -24,13 +25,35 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `access_token`
+--
+
+DROP TABLE IF EXISTS `access_token`;
+CREATE TABLE `access_token` (
+  `token` varchar(50) NOT NULL,
+  `company_access` tinyint(1) NOT NULL,
+  `customer_access` tinyint(1) NOT NULL,
+  `transporter_access` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `access_token`
+--
+
+INSERT INTO `access_token` (`token`, `company_access`, `customer_access`, `transporter_access`) VALUES
+('test-token', 1, 1, 1),
+('useless-token', 0, 0, 0);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `customer`
 --
 
 DROP TABLE IF EXISTS `customer`;
 CREATE TABLE `customer` (
   `id` int NOT NULL,
-  `name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -54,8 +77,8 @@ INSERT INTO `customer` (`id`, `name`, `start_date`, `end_date`) VALUES
 DROP TABLE IF EXISTS `employee`;
 CREATE TABLE `employee` (
   `id` int NOT NULL,
-  `department` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `department` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `role` enum('Customer representative','Storekeeper','Production planner') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -75,7 +98,7 @@ INSERT INTO `employee` (`id`, `department`, `name`, `role`) VALUES
 DROP TABLE IF EXISTS `franchise`;
 CREATE TABLE `franchise` (
   `id` int NOT NULL,
-  `shipping_address` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `shipping_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `negotiated_buying_price` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -95,7 +118,7 @@ INSERT INTO `franchise` (`id`, `shipping_address`, `negotiated_buying_price`) VA
 DROP TABLE IF EXISTS `individual_store`;
 CREATE TABLE `individual_store` (
   `id` int NOT NULL,
-  `shipping_address` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `shipping_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `negotiated_buying_price` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -116,7 +139,7 @@ DROP TABLE IF EXISTS `partner_stores`;
 CREATE TABLE `partner_stores` (
   `id` int NOT NULL,
   `franchise_id` int NOT NULL,
-  `name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -136,19 +159,23 @@ DROP TABLE IF EXISTS `produced_skis`;
 CREATE TABLE `produced_skis` (
   `prod_num` int NOT NULL,
   `prod_date` date NOT NULL,
-  `ski_type` int NOT NULL
+  `ski_type` int NOT NULL,
+  `order_id` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `produced_skis`
 --
 
-INSERT INTO `produced_skis` (`prod_num`, `prod_date`, `ski_type`) VALUES
-(1, '2021-01-11', 2),
-(2, '2021-01-05', 1),
-(3, '2021-01-11', 1),
-(4, '2020-12-21', 3),
-(5, '2020-11-18', 2);
+INSERT INTO `produced_skis` (`prod_num`, `prod_date`, `ski_type`, `order_id`) VALUES
+(1, '2021-01-11', 2, 1),
+(2, '2021-01-05', 1, 10),
+(3, '2021-01-11', 1, 1),
+(4, '2020-12-21', 3, 10),
+(5, '2020-11-18', 2, 1),
+(6, '2021-04-26', 1, 1),
+(7, '2021-04-20', 1, 1),
+(8, '2021-04-05', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -208,7 +235,7 @@ CREATE TABLE `shipment` (
   `sched_pickup_date` date DEFAULT NULL,
   `driver_id` int DEFAULT NULL,
   `transport_company` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `state` enum('not ready','ready','picked up') COLLATE utf8mb4_unicode_ci NOT NULL
+  `state` enum('not ready','ready','picked up') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -328,21 +355,39 @@ INSERT INTO `ski_order_state_history` (`id`, `ski_order_id`, `employee_id`, `dat
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `ski_order_view`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `ski_order_view`;
+CREATE TABLE `ski_order_view` (
+`order_number` int
+,`total_price` int
+,`reference_to_larger_order` int
+,`customer_id` int
+,`id` int
+,`order_id` int
+,`ski_type_id` int
+,`quantity` int
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `ski_type`
 --
 
 DROP TABLE IF EXISTS `ski_type`;
 CREATE TABLE `ski_type` (
   `id` int NOT NULL,
-  `model` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `temperature` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `grip_system` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `temperature` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `grip_system` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `size` int NOT NULL,
   `weight_class` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `historical` tinyint(1) NOT NULL,
-  `url` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `msrp` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -365,7 +410,7 @@ DROP TABLE IF EXISTS `team_skier`;
 CREATE TABLE `team_skier` (
   `id` int NOT NULL,
   `dob` date NOT NULL,
-  `club` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `club` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `numer_of_skis_pr_year` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -375,6 +420,40 @@ CREATE TABLE `team_skier` (
 
 INSERT INTO `team_skier` (`id`, `dob`, `club`, `numer_of_skis_pr_year`) VALUES
 (2, '2021-04-07', 'Famileklubben', 50);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `whatever`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `whatever`;
+CREATE TABLE `whatever` (
+`order_number` int
+,`total_price` int
+,`reference_to_larger_order` int
+,`customer_id` int
+);
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `ski_order_view`
+--
+DROP TABLE IF EXISTS `ski_order_view`;
+
+DROP VIEW IF EXISTS `ski_order_view`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`idatg2204`@`%` SQL SECURITY DEFINER VIEW `ski_order_view`  AS SELECT `ski_order`.`order_number` AS `order_number`, `ski_order`.`total_price` AS `total_price`, `ski_order`.`reference_to_larger_order` AS `reference_to_larger_order`, `ski_order`.`customer_id` AS `customer_id`, `ski_order_ski_type`.`id` AS `id`, `ski_order_ski_type`.`order_id` AS `order_id`, `ski_order_ski_type`.`ski_type_id` AS `ski_type_id`, `ski_order_ski_type`.`quantity` AS `quantity` FROM (`ski_order` join `ski_order_ski_type` on((`ski_order`.`order_number` = `ski_order_ski_type`.`order_id`))) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `whatever`
+--
+DROP TABLE IF EXISTS `whatever`;
+
+DROP VIEW IF EXISTS `whatever`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`idatg2204`@`%` SQL SECURITY DEFINER VIEW `whatever`  AS SELECT `ski_order`.`order_number` AS `order_number`, `ski_order`.`total_price` AS `total_price`, `ski_order`.`reference_to_larger_order` AS `reference_to_larger_order`, `ski_order`.`customer_id` AS `customer_id` FROM `ski_order` ;
 
 --
 -- Indexes for dumped tables
@@ -416,7 +495,8 @@ ALTER TABLE `partner_stores`
 --
 ALTER TABLE `produced_skis`
   ADD PRIMARY KEY (`prod_num`),
-  ADD KEY `ski_type_ski_constraint` (`ski_type`);
+  ADD KEY `ski_type_ski_constraint` (`ski_type`),
+  ADD KEY `produced_skis_order_id_ski_order_order_number` (`order_id`);
 
 --
 -- Indexes for table `production_plan`
@@ -508,7 +588,7 @@ ALTER TABLE `partner_stores`
 -- AUTO_INCREMENT for table `produced_skis`
 --
 ALTER TABLE `produced_skis`
-  MODIFY `prod_num` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `prod_num` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `production_plan`
@@ -566,66 +646,68 @@ ALTER TABLE `ski_type`
 -- Constraints for table `franchise`
 --
 ALTER TABLE `franchise`
-  ADD CONSTRAINT `customer_franchise_constraint` FOREIGN KEY (`id`) REFERENCES `customer` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `customer_franchise_constraint` FOREIGN KEY (`id`) REFERENCES `customer` (`id`);
 
 --
 -- Constraints for table `individual_store`
 --
 ALTER TABLE `individual_store`
-  ADD CONSTRAINT `customer_individual_store_constraint` FOREIGN KEY (`id`) REFERENCES `customer` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `customer_individual_store_constraint` FOREIGN KEY (`id`) REFERENCES `customer` (`id`);
 
 --
 -- Constraints for table `partner_stores`
 --
 ALTER TABLE `partner_stores`
-  ADD CONSTRAINT `franchise_franchise_id_constraint` FOREIGN KEY (`franchise_id`) REFERENCES `franchise` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `franchise_franchise_id_constraint` FOREIGN KEY (`franchise_id`) REFERENCES `franchise` (`id`);
 
 --
 -- Constraints for table `produced_skis`
 --
 ALTER TABLE `produced_skis`
-  ADD CONSTRAINT `ski_type_ski_constraint` FOREIGN KEY (`ski_type`) REFERENCES `ski_type` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `produced_skis_order_id_ski_order_order_number` FOREIGN KEY (`order_id`) REFERENCES `ski_order` (`order_number`),
+  ADD CONSTRAINT `ski_type_ski_constraint` FOREIGN KEY (`ski_type`) REFERENCES `ski_type` (`id`);
 
 --
 -- Constraints for table `production_plan_ski`
 --
 ALTER TABLE `production_plan_ski`
-  ADD CONSTRAINT `production_plan_production_plan_ski_constraint` FOREIGN KEY (`production_plan_id`) REFERENCES `production_plan` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `production_plan_ski_type_constraint` FOREIGN KEY (`ski_type_id`) REFERENCES `ski_type` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `production_plan_production_plan_ski_constraint` FOREIGN KEY (`production_plan_id`) REFERENCES `production_plan` (`id`),
+  ADD CONSTRAINT `production_plan_ski_type_constraint` FOREIGN KEY (`ski_type_id`) REFERENCES `ski_type` (`id`);
 
 --
 -- Constraints for table `shipment_orders`
 --
 ALTER TABLE `shipment_orders`
-  ADD CONSTRAINT `shipment_orders_shipment_constraint` FOREIGN KEY (`shipment_num`) REFERENCES `shipment` (`shipment_num`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `shipment_orders_ski_order_constraint` FOREIGN KEY (`order_num`) REFERENCES `ski_order` (`order_number`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `shipment_orders_shipment_constraint` FOREIGN KEY (`shipment_num`) REFERENCES `shipment` (`shipment_num`),
+  ADD CONSTRAINT `shipment_orders_ski_order_constraint` FOREIGN KEY (`order_num`) REFERENCES `ski_order` (`order_number`);
 
 --
 -- Constraints for table `ski_order`
 --
 ALTER TABLE `ski_order`
-  ADD CONSTRAINT `ski_order_customer_constraint` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `ski_order_order_constraint` FOREIGN KEY (`reference_to_larger_order`) REFERENCES `ski_order` (`order_number`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `ski_order_customer_constraint` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
+  ADD CONSTRAINT `ski_order_order_constraint` FOREIGN KEY (`reference_to_larger_order`) REFERENCES `ski_order` (`order_number`);
 
 --
 -- Constraints for table `ski_order_ski_type`
 --
 ALTER TABLE `ski_order_ski_type`
-  ADD CONSTRAINT `order_order_ski_type_constraint` FOREIGN KEY (`order_id`) REFERENCES `ski_order` (`order_number`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `ski_type_order_ski_type_constraint` FOREIGN KEY (`ski_type_id`) REFERENCES `ski_type` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `order_order_ski_type_constraint` FOREIGN KEY (`order_id`) REFERENCES `ski_order` (`order_number`),
+  ADD CONSTRAINT `ski_type_order_ski_type_constraint` FOREIGN KEY (`ski_type_id`) REFERENCES `ski_type` (`id`);
 
 --
 -- Constraints for table `ski_order_state_history`
 --
 ALTER TABLE `ski_order_state_history`
-  ADD CONSTRAINT `ski_order_ski_order_state_history_constriant` FOREIGN KEY (`ski_order_id`) REFERENCES `ski_order` (`order_number`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `ski_order_state_history_employee_constraint` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `ski_order_ski_order_state_history_constriant` FOREIGN KEY (`ski_order_id`) REFERENCES `ski_order` (`order_number`),
+  ADD CONSTRAINT `ski_order_state_history_employee_constraint` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`id`);
 
 --
 -- Constraints for table `team_skier`
 --
 ALTER TABLE `team_skier`
-  ADD CONSTRAINT `customer_team_skier_constraint` FOREIGN KEY (`id`) REFERENCES `customer` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `customer_team_skier_constraint` FOREIGN KEY (`id`) REFERENCES `customer` (`id`);
+SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
