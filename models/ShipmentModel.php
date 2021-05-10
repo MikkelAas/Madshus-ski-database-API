@@ -117,6 +117,7 @@ class ShipmentModel {
             'shipping_address' => $row['shipping_address'],
             'sched_pickup_date' => $row['sched_pickup_date'],
             'driver_id' => $row['driver_id'],
+            'state' => $row['state'],
             'transport_company' => $row['transport_company']
           ),
           array()
