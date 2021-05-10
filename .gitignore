@@ -3,6 +3,7 @@ vendor/
 
 config/config.php
 config/config_test.php
+
 api.suite.yml
 unit.suite.yml
 
