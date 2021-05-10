@@ -13,6 +13,6 @@ class PlanModelTest extends \Codeception\Test\Unit{
         $res = $planModel->getPlan();
 
         self::assertCount(2, $res);
-        self::assertStringContainsStringIgnoringCase("2021-04-08", $res['start_date']);
+        self::assertStringContainsStringIgnoringCase("2021-04-20", $res['start_date']);
     }
 }
