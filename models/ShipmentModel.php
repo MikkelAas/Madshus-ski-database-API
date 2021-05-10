@@ -111,20 +111,18 @@ class ShipmentModel {
 
       if (!array_key_exists($shipmentNum, $res)) {
         $res[$shipmentNum] = array(
-          array(
             'shipment_num' => $shipmentNum,
             'store_name' => $row['store_name'],
             'shipping_address' => $row['shipping_address'],
             'sched_pickup_date' => $row['sched_pickup_date'],
             'driver_id' => $row['driver_id'],
             'state' => $row['state'],
-            'transport_company' => $row['transport_company']
-          ),
-          array()
+            'transport_company' => $row['transport_company'],
+            'orders' => array()
         );
       }
 
-      array_push($res[$shipmentNum][1], $row['order_num']);
+      array_push($res[$shipmentNum]["orders"], $row['order_num']);
     }
 
     return array_values($res);
