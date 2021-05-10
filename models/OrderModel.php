@@ -394,6 +394,26 @@ class OrderModel{
     }
 
     /**
+     * Returns all ski types in an order as an array
+     * @param int $orderId The order ID
+     * @return array Returns an array of string
+     */
+    public function getAllSkiTypesInOrder(int $orderId): array{
+
+        $query = '
+            SELECT DISTINCT ski_order_ski_type.ski_type_id 
+            FROM `ski_order_ski_type` 
+            WHERE ski_order_ski_type.order_id = :order_number
+        ';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':order_number', $orderId);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+}
+
+    /**
      * Assigns an order number to a produced ski for an x number of skis where the order number was null.
      * @param int $skiTypeId The ski type id.
      * @param int $orderId The order number.
