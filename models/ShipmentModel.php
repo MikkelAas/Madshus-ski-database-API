@@ -82,7 +82,7 @@ class ShipmentModel {
    * @param int $shipmentNum shipment number of the shipment to update
    * @param string $newState new state of the shipment
    */
-  function updateShipment(int $shipmentNum, string $newState) {
+  function updateShipment(int $shipmentNum, string $newState): int{
     $query = '
       UPDATE `shipment` 
       SET `state`= :newState
@@ -95,11 +95,7 @@ class ShipmentModel {
 
     $stmt->execute();
 
-    // if zero rows affected, throw exception
-    if ($stmt->rowCount() == 0) {
-      throw new \http\Exception\InvalidArgumentException($shipmentNum." does not exist!");
-    };
-
+    return $stmt->rowCount();
   }
 
   /**
