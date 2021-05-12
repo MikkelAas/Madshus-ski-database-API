@@ -62,17 +62,20 @@ class PlanModel{
 
         // try to add ever ski type and quantity for the plan
         foreach ($plan as $value) {
+          if (!array_key_exists("ski_type_id", $value) || !array_key_exists("daily_amount", $value)) {
+            throw new Exception("Incorrect json");
+          }
+
           $stmt = $this->db->prepare($query3);
           $stmt->bindValue(':id', $id);
-          $stmt->bindValue(':ski_type_id', $value[0]);
-          $stmt->bindValue(':quantity', $value[1]);
+          $stmt->bindValue(':ski_type_id', $value["ski_type_id"]);
+          $stmt->bindValue(':quantity', $value["daily_amount"]);
           $stmt->execute();
         }
 
         $this->db->commit();
       } catch (Exception $e){
         $this->db->rollBack();
-        print $e->getMessage();
         throw new Exception("Error inserting skis and quantities");
       }
     }
