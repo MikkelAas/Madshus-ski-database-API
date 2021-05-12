@@ -15,6 +15,7 @@ switch ($method){
       if ($newDate == "" || !is_array($plannedSkis) || sizeof($plannedSkis) == 0) {
         http_response_code(400);
         echo json_encode(array("error" => "Invalid data"));
+        return;
       }
 
       try {
