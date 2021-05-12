@@ -18,83 +18,63 @@ class PlanModel{
         $this->db = require('db/pdo_connection.php');
     }
 
-    public function createPlanWithMultipleSkis(){
+  /**
+   * Creates a new production plan by adding to the production plan and production plan skis table.
+   * @param string $startDate
+   * @param array $plan
+   */
+    public function createPlan(string $startDate, array $plan) {
 
-    }
+      $date = DateTime::createFromFormat('Y-m-d', $startDate);
+      if (!$date || $date->format('Y-m-d') != $startDate) {
+        throw new InvalidArgumentException("Invalid date.");
+      }
 
-    /**
-     * Creates a new production plan by adding to the production plan and production plan skis table.
-     * @param int $skiTypeId
-     * @param int $quantity
-     */
-    public function createPlan(int $skiTypeId, int $quantity){
-        try {
-            $this->db->beginTransaction();
+      try {
+        $this->db->beginTransaction();
 
-            // Inserts a new entry to the production plan table ith the current date.
-            $query1 = '
+        // create new plan with specified start date
+        $query1 = '
                 INSERT INTO `production_plan` (`id`, `start_date`) 
                 VALUES (NULL, :date_now);
             ';
 
-            $stmt = $this->db->prepare($query1);
-            $stmt->bindValue(':date_now', date("Y-m-d"));
-            $stmt->execute();
+        $stmt = $this->db->prepare($query1);
+        $stmt->bindValue(':date_now', $startDate);
+        $stmt->execute();
 
-            // Selects the max id to get the newest entry in the table.
-            // TODO: Find a better way to do this...
-            $query2 = 'SELECT MAX(production_plan.id) FROM production_plan';
+        // get id of the newly created production plan in a bad way
+        $query2 = 'SELECT MAX(production_plan.id) FROM production_plan';
 
-            $stmt = $this->db->prepare($query2);
-            $stmt->execute();
-            $id = $stmt->fetchColumn(0);
+        $stmt = $this->db->prepare($query2);
+        $stmt->execute();
+        $id = $stmt->fetchColumn(0);
 
-            // Inserts into the production plan skis table for each entry in the array.
-            $query3 = '
+        $query3 = '
                 INSERT INTO `production_plan_ski` (`id`, `production_plan_id`, `ski_type_id`, `daily_amount`) 
                 VALUES (
                     NULL, 
-                    $id, 
+                    :id, 
                     :ski_type_id, 
                     :quantity
                 );
             ';
 
-            $stmt = $this->db->prepare($query3);
-            $stmt->bindValue(':ski_type_id', $skiTypeId);
-            $stmt->bindValue('quantity', $quantity);
-            $stmt->execute();
-
-            $this->db->commit();
-
-        } catch (Exception $e){
-            echo "Failed: " . $e->getMessage();
-            $this->db->rollBack();
+        // try to add ever ski type and quantity for the plan
+        foreach ($plan as $value) {
+          $stmt = $this->db->prepare($query3);
+          $stmt->bindValue(':id', $id);
+          $stmt->bindValue(':ski_type_id', $value[0]);
+          $stmt->bindValue(':quantity', $value[1]);
+          $stmt->execute();
         }
-    }
 
-    /**
-     * Adds an entry to an already existing production plan.
-     * @param int $id
-     * @param int $skiTypeId
-     * @param int $quantity
-     */
-    public function addToPlan(int $id, int $skiTypeId, int $quantity){
-        $query = '
-            INSERT INTO `production_plan_ski` (`id`, `production_plan_id`, `ski_type_id`, `daily_amount`) 
-            VALUES (
-                NULL, 
-                :production_plan_id, 
-                :ski_type_id, 
-                :quantity
-            );
-        ';
-
-        $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':production_plan_id', $id);
-        $stmt->bindValue(':ski_type_id', $skiTypeId);
-        $stmt->bindValue(':quantity', $quantity);
-        $stmt->execute();
+        $this->db->commit();
+      } catch (Exception $e){
+        $this->db->rollBack();
+        print $e->getMessage();
+        throw new Exception("Error inserting skis and quantities");
+      }
     }
 
     /**
