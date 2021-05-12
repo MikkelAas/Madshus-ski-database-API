@@ -10,6 +10,8 @@ $endpoints = [
     "/rest/trans/orders"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)],
     "/rest/trans/update"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)],
     "/rest/com/prod/planner"=>["public/rest/com/prod/planner.php", new Privileges(false, false, false)],
+    "/rest/com/stor/register"=>["public/rest/com/stor/keeper.php", new Privileges(false, false, false)],
+    "/rest/com/stor/orders"=>["public/rest/com/stor/keeper.php", new Privileges(false, false, false)],
 ];
 
 $queries = [];
