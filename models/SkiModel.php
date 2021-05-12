@@ -93,4 +93,26 @@ class SkiModel {
 
     return $stmt->fetchAll();
   }
+
+  /**
+   * Will create a record of a produced ski with no order connected to it
+   * @param int $skiType
+   * @param string $productionDate
+   */
+  function addProducedSki(int $skiType, string $productionDate) {
+    $date = DateTime::createFromFormat('Y-m-d', $productionDate);
+    if (!$date || $date->format('Y-m-d') != $productionDate) {
+      throw new InvalidArgumentException("Invalid date.");
+    }
+
+    $query = '
+        INSERT INTO `produced_skis` (`prod_num`, `prod_date`, `ski_type`, `order_id`) 
+        VALUES (NULL, :prodDate, :skiType, NULL) 
+    ';
+
+    $stmt = $this->db->prepare($query);
+    $stmt->bindValue(':prodDate', $productionDate);
+    $stmt->bindValue(':skiType', $skiType);
+    $stmt->execute();
+  }
 }
