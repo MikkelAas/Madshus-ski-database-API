@@ -9,6 +9,12 @@ switch ($method){
     if (array_key_exists(4, $pathParts) && $pathParts[4] == "planner") {
       $data = json_decode(file_get_contents('php://input'), true);
 
+      if (!array_key_exists("start_date", $data) || !array_key_exists("planned_skis", $data)) {
+        http_response_code(400);
+        echo json_encode(array("error" => "invalid input, check your json!"));
+        return;
+      }
+
       $newDate = $data['start_date'];
       $plannedSkis = $data['planned_skis'];
 
