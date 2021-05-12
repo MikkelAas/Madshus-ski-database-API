@@ -33,12 +33,18 @@ foreach ($endpoints as $endpoint=>[$endpoint_path, $privileges]) {
             die(json_encode(["error"=>"Access token required. Add 'TOKEN' header to request."]));
         }
 
-        $tokenPrivileges = (new AccessToken())->getPrivileges($token);
+        // If empty token, set extended privileges to none
+        // Otherwise, get privileges from provided token
+        if (empty($token)) {
+            $tokenPrivileges = new Privileges(false, false, false);
+        } else {
+            $tokenPrivileges = (new AccessToken())->getPrivileges($token);
 
-        // Check if access token exists
-        if (!$tokenPrivileges) {
-            http_response_code(401);
-            die(json_encode(["error"=>"Access token is invalid"]));
+            // Check if token provided is invalid
+            if (!$tokenPrivileges) {
+                http_response_code(404);
+                die(json_encode(["error"=>"Access token provided does not exist"]));
+            }
         }
 
         // Check if access token has been granted the right privileges
