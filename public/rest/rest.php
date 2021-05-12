@@ -8,7 +8,8 @@ $endpoints = [
     "/rest/pub/skis"=>["public/rest/pub/skis.php", new Privileges(false, false, false)],
     "/rest/trans/shipments"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)],
     "/rest/trans/orders"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)],
-    "/rest/trans/update"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)]
+    "/rest/trans/update"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)],
+    "/rest/com/prod/planner"=>["public/rest/com/prod/planner.php", new Privileges(false, false, false)],
 ];
 
 $queries = [];
