@@ -89,6 +89,6 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getOrder(1);
 
-        self::assertCount(2, $res[0][1]);
+        self::assertCount(2, $res[0]['skis']);
     }
 }
