@@ -6,10 +6,15 @@ require_once('models/AccessToken.php');
 $endpoints = [
     "/rest/diag"=>["public/rest/endpoints/diag.php", new Privileges(false, false, false)],
     "/rest/pub/skis"=>["public/rest/pub/skis.php", new Privileges(false, false, false)],
-    "/rest/trans/shipments"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)],
-    "/rest/trans/orders"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)],
-    "/rest/trans/update"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)]
-];
+    "/rest/trans/shipments"=>["public/rest/trans/shipments.php", new Privileges(false, false, true)],
+    "/rest/trans/orders"=>["public/rest/trans/shipments.php", new Privileges(false, false, true)],
+    "/rest/trans/update"=>["public/rest/trans/shipments.php", new Privileges(false, false, true)],
+    "/rest/com/prod/planner"=>["public/rest/com/prod/planner.php", new Privileges(true, false, false)],
+    "/rest/com/stor/register"=>["public/rest/com/stor/keeper.php", new Privileges(true, false, false)],
+    "/rest/com/stor/orders"=>["public/rest/com/stor/keeper.php", new Privileges(true, false, false)],
+    "/rest/com/cus/orders"=>["public/rest/com/cus/customer.php", new Privileges(true, false, false)],
+    "/rest/com/cus/req_ship"=>["public/rest/com/cus/customer.php", new Privileges(true, false, false)]
+  ];
 
 $queries = [];
 
@@ -23,6 +28,12 @@ $token = isset($_SERVER['HTTP_TOKEN']) ? $_SERVER['HTTP_TOKEN'] : "";
 header("content-type: application/json");
 
 $matchedEndpoint = false;
+
+$incomingBody = file_get_contents('php://input');
+if ($incomingBody != "" && !isJson($incomingBody)) {
+  http_response_code(404);
+  die(json_encode(["error"=>"data is invalid. make sure json structure is valid!"]));
+}
 
 foreach ($endpoints as $endpoint=>[$endpoint_path, $privileges]) {
     // If path starts with endpoint
@@ -61,4 +72,9 @@ foreach ($endpoints as $endpoint=>[$endpoint_path, $privileges]) {
 if (!$matchedEndpoint) {
     http_response_code(404);
     echo json_encode(["error"=>"That endpoint does not exist!"]);
+}
+
+function isJson(string $string): bool {
+  json_decode($string);
+  return json_last_error() === JSON_ERROR_NONE;
 }
