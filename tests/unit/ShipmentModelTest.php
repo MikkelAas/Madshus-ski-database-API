@@ -29,8 +29,8 @@ class ShipmentModelTest extends \Codeception\Test\Unit {
 
     $shipmentModel->createShipmentRequest(array(10, 1));
 
-    $this->tester->seeInDatabase('shipment', ['shipment_num' => 9]);
-    $this->tester->seeNumRecords(2, 'shipment_orders', ['shipment_num' => 9]);
+    $this->tester->seeInDatabase('shipment', ['shipment_num' => 8]);
+    $this->tester->seeNumRecords(2, 'shipment_orders', ['shipment_num' => 8]);
   }
 
   /**
