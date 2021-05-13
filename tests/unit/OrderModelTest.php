@@ -2,14 +2,19 @@
 require_once('config/config_test.php');
 require('models/OrderModel.php');
 
-// TODO: Find out why the database doesn't reset.
 class OrderModelTest extends \Codeception\Test\Unit{
+
+    /**
+     * @var UnitTester
+     */
+    protected UnitTester $tester;
+
     public function testGetAllOrdersForCustomer(){
         $orderModel = new OrderModel();
 
         $res = $orderModel->getAllOrdersForCustomer(1);
         
-        self::assertCount(7, $res);
+        self::assertCount(8, $res);
     }
 
     public function testCreateOrder(){
@@ -21,13 +26,10 @@ class OrderModelTest extends \Codeception\Test\Unit{
             1,
             "new",
             NULL,
-            1,
-            250
+            [1=>250]
         );
 
-        $res = $orderModel->getAllOrdersForCustomer(1);
-
-        self::assertCount(8,$res);
+        $this->tester->seeNumRecords(11, 'ski_order');
     }
 
     public function testChangeOrderState(){
@@ -47,7 +49,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getAllOrdersForCustomer(1);
 
-        self::assertCount(6, $res);
+        self::assertCount(5, $res);
     }
 
     public function testGetOrdersNoDate(){
@@ -55,7 +57,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res1 = $orderModel->getOrders('');
 
-        self::assertCount(7, $res1);
+        self::assertCount(8, $res1);
     }
 
     public function testGetOrdersWithDate(){
@@ -63,7 +65,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getOrders('2021-04-15');
 
-        self::assertCount(1, $res);
+        self::assertCount(4, $res);
     }
 
     public function testGetOrder(){
@@ -79,7 +81,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getOrdersBasedOnState('new');
 
-        self::assertCount(7, $res);
+        self::assertCount(8, $res);
     }
 
     public function testAddToOrder(){
@@ -90,5 +92,19 @@ class OrderModelTest extends \Codeception\Test\Unit{
         $res = $orderModel->getOrder(1);
 
         self::assertCount(2, $res[0]['skis']);
+    }
+
+    public function testChangeQuantity(){
+        $orderModel = new OrderModel();
+
+        $orderModel->changeQuantity(13, 5001);
+
+        $this->tester->seeInDatabase(
+            'ski_order_ski_type',
+            [
+                'ski_order_ski_type.id' => 13,
+                'ski_order_ski_type.quantity' => 5001
+            ]
+        );
     }
 }
