@@ -29,6 +29,12 @@ header("content-type: application/json");
 
 $matchedEndpoint = false;
 
+$incomingBody = file_get_contents('php://input');
+if ($incomingBody != "" && !isJson($incomingBody)) {
+  http_response_code(404);
+  die(json_encode(["error"=>"data is invalid. make sure json structure is valid!"]));
+}
+
 foreach ($endpoints as $endpoint=>[$endpoint_path, $privileges]) {
     // If path starts with endpoint
     if (strpos($path, $endpoint) === 0) {
@@ -66,4 +72,9 @@ foreach ($endpoints as $endpoint=>[$endpoint_path, $privileges]) {
 if (!$matchedEndpoint) {
     http_response_code(404);
     echo json_encode(["error"=>"That endpoint does not exist!"]);
+}
+
+function isJson(string $string): bool {
+  json_decode($string);
+  return json_last_error() === JSON_ERROR_NONE;
 }
