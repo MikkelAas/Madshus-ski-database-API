@@ -73,7 +73,7 @@ class ShipmentModel {
       $this->db->commit();
     }  catch (Exception $e) {
       $this->db->rollBack();
-      echo ":( Failed: " . $e->getMessage();
+      throw new Exception("Unable to create shipment request");
     }
   }
 
