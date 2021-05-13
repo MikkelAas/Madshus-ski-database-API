@@ -14,7 +14,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getAllOrdersForCustomer(1);
         
-        self::assertCount(7, $res);
+        self::assertCount(8, $res);
     }
 
     public function testCreateOrder(){
@@ -29,7 +29,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
             [1=>250]
         );
 
-        $this->tester->seeNumRecords(8, 'ski_order');
+        $this->tester->seeNumRecords(11, 'ski_order');
     }
 
     public function testChangeOrderState(){
@@ -49,7 +49,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getAllOrdersForCustomer(1);
 
-        self::assertCount(6, $res);
+        self::assertCount(5, $res);
     }
 
     public function testGetOrdersNoDate(){
@@ -57,7 +57,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res1 = $orderModel->getOrders('');
 
-        self::assertCount(7, $res1);
+        self::assertCount(8, $res1);
     }
 
     public function testGetOrdersWithDate(){
@@ -65,7 +65,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getOrders('2021-04-15');
 
-        self::assertCount(1, $res);
+        self::assertCount(4, $res);
     }
 
     public function testGetOrder(){
@@ -81,7 +81,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getOrdersBasedOnState('new');
 
-        self::assertCount(7, $res);
+        self::assertCount(5, $res);
     }
 
     public function testAddToOrder(){
