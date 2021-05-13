@@ -6,14 +6,14 @@ require_once('models/AccessToken.php');
 $endpoints = [
     "/rest/diag"=>["public/rest/endpoints/diag.php", new Privileges(false, false, false)],
     "/rest/pub/skis"=>["public/rest/pub/skis.php", new Privileges(false, false, false)],
-    "/rest/trans/shipments"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)],
-    "/rest/trans/orders"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)],
-    "/rest/trans/update"=>["public/rest/trans/shipments.php", new Privileges(false, false, false)],
-    "/rest/com/prod/planner"=>["public/rest/com/prod/planner.php", new Privileges(false, false, false)],
-    "/rest/com/stor/register"=>["public/rest/com/stor/keeper.php", new Privileges(false, false, false)],
-    "/rest/com/stor/orders"=>["public/rest/com/stor/keeper.php", new Privileges(false, false, false)],
-    "/rest/com/cus/orders"=>["public/rest/com/cus/customer.php", new Privileges(false, false, false)],
-    "/rest/com/cus/req_ship"=>["public/rest/com/cus/customer.php", new Privileges(false, false, false)]
+    "/rest/trans/shipments"=>["public/rest/trans/shipments.php", new Privileges(false, false, true)],
+    "/rest/trans/orders"=>["public/rest/trans/shipments.php", new Privileges(false, false, true)],
+    "/rest/trans/update"=>["public/rest/trans/shipments.php", new Privileges(false, false, true)],
+    "/rest/com/prod/planner"=>["public/rest/com/prod/planner.php", new Privileges(true, false, false)],
+    "/rest/com/stor/register"=>["public/rest/com/stor/keeper.php", new Privileges(true, false, false)],
+    "/rest/com/stor/orders"=>["public/rest/com/stor/keeper.php", new Privileges(true, false, false)],
+    "/rest/com/cus/orders"=>["public/rest/com/cus/customer.php", new Privileges(true, false, false)],
+    "/rest/com/cus/req_ship"=>["public/rest/com/cus/customer.php", new Privileges(true, false, false)]
   ];
 
 $queries = [];
