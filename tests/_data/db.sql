@@ -33,7 +33,7 @@ CREATE TABLE `access_token` (
   `company_access` tinyint(1) NOT NULL,
   `customer_access` tinyint(1) NOT NULL,
   `transporter_access` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `access_token`
