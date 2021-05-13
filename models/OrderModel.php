@@ -1,6 +1,4 @@
 <?php
-
-
 /**
  * Class OrderModel.
  * This class generates JSON documents.
@@ -52,8 +50,7 @@ class OrderModel{
      * @param int $customerId The id of the customer that the order belongs to.
      * @param string $stateMessage Sets the state of the order.
      * @param mixed $employeeId Is either an int or null.
-     * @param int $skipTypeId The id of the type os ski that is ordered.
-     * @param int $quantity The quantity of the type of ski.
+     * @param array $skiTypeQuantityMap
      */
     public function createOrder(
         int $totalPrice,
@@ -61,10 +58,13 @@ class OrderModel{
         int $customerId,
         string $stateMessage ,
         $employeeId,
-        int $skipTypeId,
-        int $quantity){
+        array $skiTypeQuantityMap){
         try {
-            $this->db->beginTransaction();
+            $existingTransaction = $this->db->inTransaction();
+
+            if (!$existingTransaction) {
+                $this->db->beginTransaction();
+            }
 
             // Checks if the state message is valid.
             if ($stateMessage != 'new' && $stateMessage != 'open' && $stateMessage != "skis available"){
@@ -121,23 +121,31 @@ class OrderModel{
             $stmt->bindValue(':date_now', date("Y-m-d"));
             $stmt->execute();
 
-            $query4 = '
-            INSERT INTO `ski_order_ski_type` (`id`, `order_id`, `ski_type_id`, `quantity`) 
-            VALUES (
-                NULL,
-                :order_number,
-                :ski_type_id,
-                :number_of_skis
-            );
-        ';
+            foreach ($skiTypeQuantityMap as $skipTypeId=>$quantity){
+                if ($quantity == 0) {
+                    continue;
+                }
 
-            $stmt = $this->db->prepare($query4);
-            $stmt->bindValue(':order_number', $orderId);
-            $stmt->bindValue(':ski_type_id', $skipTypeId);
-            $stmt->bindValue(':number_of_skis', $quantity);
-            $stmt->execute();
+                $query4 = '
+                    INSERT INTO `ski_order_ski_type` (`id`, `order_id`, `ski_type_id`, `quantity`) 
+                    VALUES (
+                        NULL,
+                        :order_number,
+                        :ski_type_id,
+                        :number_of_skis
+                    );
+                ';
 
-            $this->db->commit();
+                $stmt = $this->db->prepare($query4);
+                $stmt->bindValue(':order_number', $orderId);
+                $stmt->bindValue(':ski_type_id', $skipTypeId);
+                $stmt->bindValue(':number_of_skis', $quantity);
+                $stmt->execute();
+            }
+
+            if (!$existingTransaction) {
+                $this->db->commit();
+            }
         } catch (Exception $e) {
             $this->db->rollBack();
             echo "Failed: " . $e->getMessage();
@@ -231,6 +239,86 @@ class OrderModel{
 
             $this->db->commit();
         } catch(Exception $e){
+            $this->db->rollBack();
+            echo "Failed: " . $e->getMessage();
+        }
+    }
+
+    public function splitOrder(int $orderId){
+        try {
+            $this->db->beginTransaction();
+
+            $orderInfo = $this->getOrder($orderId);
+            // Find all ski types in the order
+            $skiTypesInOrder = $this->getAllSkiTypesInOrder($orderId);
+            $filledSkis = $this->getFilledSkis($orderId);
+
+            print("--- Ski types ---");
+            print_r($skiTypesInOrder);
+
+            print("--- Filled skis ---");
+            print_r($filledSkis);
+
+            $unfilledSkis = [];
+
+            foreach ($skiTypesInOrder as $skiType=>$quantity) {
+                if (array_key_exists($skiType, $filledSkis)) {
+                    $unfilledSkis[$skiType] = $quantity - $filledSkis[$skiType];
+                } else {
+                    $unfilledSkis[$skiType] = $quantity;
+                    $filledSkis[$skiType] = 0;
+                }
+            }
+
+            print("--- Unfilled skis ---");
+            print_r($unfilledSkis);
+
+            // Assign produced skis
+            $affectedSkiTypes = $this->assignProducedSki($orderId, $skiTypesInOrder);
+
+            print("--- Affected ski types ---");
+            print_r($affectedSkiTypes);
+
+            // Update quantity of "old" order
+            foreach ($filledSkis as $skiType=>$quantity){
+                // Update filled / unfilled skis to reflect newly assigned produced skis
+                $filledSkis[$skiType] = $quantity + $affectedSkiTypes[$skiType];
+                $unfilledSkis[$skiType] = $unfilledSkis[$skiType] - $affectedSkiTypes[$skiType];
+                $quantity = $filledSkis[$skiType];
+
+                if ($quantity == 0) {
+                    // Deletes from ski order ski type where the quantity is zero
+                    $query = '
+                        DELETE FROM ski_order_ski_type
+                        WHERE ski_order_ski_type.order_id = :order_number AND ski_order_ski_type.ski_type_id = :ski_type_id
+                    ';
+                    $stmt = $this->db->prepare($query);
+                    $stmt->bindValue(':order_number', $orderId);
+                    $stmt->bindValue(':ski_type_id', $skiType);
+                } else {
+                    // Sets the quantity of the "old" order to what has been produced for the order
+                    $query = '
+                        UPDATE ski_order_ski_type
+                        SET quantity = :filled_skis
+                        WHERE ski_order_ski_type.order_id = :order_number AND ski_order_ski_type.ski_type_id = :ski_type_id
+                 ';
+
+                    $stmt = $this->db->prepare($query);
+                    $stmt->bindValue(':filled_skis', $quantity);
+                    $stmt->bindValue(':ski_type_id', $skiType);
+                    $stmt->bindValue(':order_number', $orderId);
+                }
+                $stmt->execute();
+            }
+
+            $customerId = $orderInfo[0][0]['customer_id'];
+            print("--- Unfilled skis 2 ---");
+            print_r($unfilledSkis);
+            // Creates a new order with the unfilled skis and sets a reference to the original order
+            $this->createOrder(0, $orderId, $customerId, "new", null, $unfilledSkis);
+
+            $this->db->commit();
+        } catch (Exception $e){
             $this->db->rollBack();
             echo "Failed: " . $e->getMessage();
         }
@@ -394,14 +482,13 @@ class OrderModel{
     }
 
     /**
-     * Returns all ski types in an order as an array
+     * Returns all ski types in an order as a id-quantity map
      * @param int $orderId The order ID
      * @return array Returns an array of string
      */
     public function getAllSkiTypesInOrder(int $orderId): array{
-
         $query = '
-            SELECT DISTINCT ski_order_ski_type.ski_type_id 
+            SELECT DISTINCT ski_order_ski_type.ski_type_id, ski_order_ski_type.quantity
             FROM `ski_order_ski_type` 
             WHERE ski_order_ski_type.order_id = :order_number
         ';
@@ -410,35 +497,58 @@ class OrderModel{
         $stmt->bindValue(':order_number', $orderId);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 }
 
     /**
      * Assigns an order number to a produced ski for an x number of skis where the order number was null.
-     * @param int $skiTypeId The ski type id.
-     * @param int $orderId The order number.
-     * @param int $numberOfSkis The number of skis that is to be updated.
+     * @param int $orderId The ID of the order.
+     * @param array $skiTypeQuantityMap
      */
-    public function assignProducedSki(int $skiTypeId, int $orderId, int $numberOfSkis){
+    public function assignProducedSki(int $orderId, array $skiTypeQuantityMap) : array {
+        $skiTypeAffectedMap = [];
 
-        $query = '
+        foreach ($skiTypeQuantityMap as $skiTypeId => $quantity){
+            $query = '
             UPDATE `produced_skis` 
             SET `order_id` = :order_number 
             WHERE produced_skis.ski_type = :ski_type_id AND produced_skis.order_id IS NULL 
             LIMIT :number_of_skis
         ';
 
-        $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':order_number', $orderId);
-        $stmt->bindValue(':ski_type_id', $skiTypeId);
-        // Bind value could be unnecessary here since the value will be computed by the getUnfilledSkis function
-        // However, the function becomes more flexible ...
-        $stmt->bindValue(':number_of_skis', $numberOfSkis);
-        $stmt->bindValue();
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':order_number', $orderId);
+            $stmt->bindValue(':ski_type_id', $skiTypeId);
+            $stmt->bindValue(':number_of_skis', $quantity, PDO::PARAM_INT);
 
-        $stmt->execute();
+            $stmt->execute();
+
+            // A map where the key is the ski type affected and the value is the number of affected rows with this id
+            $skiTypeAffectedMap[$skiTypeId] = $stmt->rowCount();
+        }
+
+        return $skiTypeAffectedMap;
     }
 
+    /**
+     * Retrieves the number of filled skis for an order
+     * @param int $orderId The ID of the order
+     * @return array An array of the quantity of ski types that have been filled
+     */
+    public function getFilledSkis(int $orderId): array{
+        $query = "
+            SELECT produced_skis.ski_type, COUNT(produced_skis.ski_type) as filled_skis
+            FROM `produced_skis` 
+            WHERE produced_skis.order_id = :order_number
+            GROUP BY produced_skis.ski_type
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':order_number', $orderId);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+    }
 
     /**
      * Calculates the number of unfilled skis.
@@ -460,13 +570,14 @@ class OrderModel{
         $producedSkis = $stmt->fetchColumn(0);
 
         $query2 = '
-            SELECT SUM(ski_order_ski_type.quantity) 
+            SELECT ski_order_ski_type.quantity 
             FROM `ski_order_ski_type` 
-            WHERE ski_order_ski_type.ski_type_id = :ski_type_id
+            WHERE ski_order_ski_type.ski_type_id = :ski_type_id AND ski_order_ski_type.order_id = :order_number
         ';
 
         $stmt = $this->db->prepare($query2);
         $stmt->bindValue(':ski_type_id', $skiTypeId);
+        $stmt->bindValue(':order_number', $orderId);
         $stmt->execute();
         $orderedSkis = $stmt->fetchColumn(0);
 
