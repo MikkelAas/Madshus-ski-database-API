@@ -81,7 +81,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
 
         $res = $orderModel->getOrdersBasedOnState('new');
 
-        self::assertCount(5, $res);
+        self::assertCount(8, $res);
     }
 
     public function testAddToOrder(){
