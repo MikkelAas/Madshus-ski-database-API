@@ -26,8 +26,7 @@ class OrderModelTest extends \Codeception\Test\Unit{
             1,
             "new",
             NULL,
-            1,
-            250
+            [1=>250]
         );
 
         $this->tester->seeNumRecords(8, 'ski_order');
