@@ -40,10 +40,14 @@ before_script:
   - cp tests/unit.suite_template.yml tests/unit.suite.yml
   # List files in tests directory
   - ls tests/
-  # Setup apache2 configuration file
-  - cat /etc/apache2/sites-enabled/000-default.conf | sed -e "s/\/var\/www\/html/$(pwd | sed -e "s/\//\\\\\//")\/public/" > /etc/apache2/sites-enabled/test.conf
+  # Setup apache2 document root
+  - cat /etc/apache2/sites-enabled/000-default.conf | sed -e "s|/var/www/html|$(pwd)/public|" > /etc/apache2/sites-enabled/test.conf
   - rm /etc/apache2/sites-enabled/000-default.conf
   - cat /etc/apache2/sites-enabled/test.conf
+  # Update apache2.conf
+  - cat /etc/apache2/apache2.conf | sed -e "s|/var/www/|$(pwd)|" > /etc/apache2/apache2.newconf
+  - mv /etc/apache2/apache2.newconf /etc/apache2/apache2.conf
+  - cat /etc/apache2/apache2.conf
 
 # Test
 test:
