@@ -1,8 +1,10 @@
 <?php
 
 require ('models/OrderModel.php');
+require ('models/PlanModel.php');
 
 $orderModel = new OrderModel();
+$planModel = new PlanModel();
 
 
 switch ($method){
@@ -13,13 +15,16 @@ switch ($method){
             $res = $orderModel->getOrders($queries["since"]);
         } else if (!array_key_exists(4, $pathParts)){
             $res = $orderModel->getOrders(NULL);
-        } else {
+        } else if (array_key_exists(3, $pathParts) && str_starts_with($pathParts[3], 'plan')) {
+            $planModel->getPlan();
+        }
+        else {
             http_response_code(400);
             echo json_encode(array("error"=>"invalid endpoint"));
         }
         break;
     case "POST":
-        if (array_key_exists(4, $pathParts) && $pathParts[4] == "create") {
+        if (array_key_exists(4, $pathParts) && str_ends_with($pathParts[4], "create")) {
 
             $data = json_decode(file_get_contents('php://input'), true);
 
@@ -28,12 +33,22 @@ switch ($method){
             $customerId = $data['customer_id'];
             $stateMessage = $data['state'];
             $employeeId = $data['employee_id'];
-            $skiTypeId = $data['ski_type_id'];
-            $quantity = $data['quantity'];
+            $skiTypeQuantityMap = $data['ski_type_quantity_map'];
 
-            $orderModel->createOrder($totalPrice, $refToLargerOrder, $customerId, $stateMessage, $employeeId, $skiTypeId, $quantity);
+            $orderModel->createOrder(
+                $totalPrice,
+                $refToLargerOrder,
+                $customerId,
+                $stateMessage,
+                $employeeId,
+                $skiTypeQuantityMap
+            );
             http_response_code(201);
             return;
+        } else if (array_key_exists(3, $pathParts[3]) && str_starts_with($pathParts[3], "split")){
+            if (array_key_exists('order_id', $queries)){
+                $orderModel->splitOrder($queries['order_id']);
+            }
         } else {
             http_response_code(400);
             echo json_encode(array("error"=>"invalid endpoint"));
@@ -41,17 +56,13 @@ switch ($method){
         }
     case "DELETE":
         if (array_key_exists(4, $pathParts) && is_numeric($pathParts[4])){
-            $data = json_decode(file_get_contents('php://input'), true);
-            $id = $data['id'];
-            $orderModel->deleteOrder($id);
+            $orderModel->deleteOrder($pathParts[4]);
             http_response_code(200);
-
             return;
         } else {
             http_response_code(400);
             echo json_encode(array("error"=>"invalid endpoint"));
         }
-    // TODO: Create get split order and get plan endpoint.
     default:
         http_response_code(405);
         echo json_encode(array("error"=>"invalid method " . $method));
