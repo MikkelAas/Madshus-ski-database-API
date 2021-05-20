@@ -48,6 +48,8 @@ before_script:
   - cat /etc/apache2/apache2.conf | sed -e "s|/var/www/|$(pwd)|" > /etc/apache2/apache2.newconf
   - mv /etc/apache2/apache2.newconf /etc/apache2/apache2.conf
   - cat /etc/apache2/apache2.conf
+  # Start apache2
+  - service apache2 start
 
 # Test
 test:
