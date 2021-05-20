@@ -45,7 +45,7 @@ before_script:
   - rm /etc/apache2/sites-enabled/000-default.conf
   - cat /etc/apache2/sites-enabled/test.conf
   # Update apache2.conf
-  - cat /etc/apache2/apache2.conf | sed -e "s|/var/www/|$(pwd)|" > /etc/apache2/apache2.newconf
+  - cat /etc/apache2/apache2.conf | sed -e "s|/var/www/|$(pwd)|" | sed -e "s|AllowOverride None|AllowOverride All|" > /etc/apache2/apache2.newconf
   - mv /etc/apache2/apache2.newconf /etc/apache2/apache2.conf
   - cat /etc/apache2/apache2.conf
   # Start apache2
