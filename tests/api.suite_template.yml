@@ -3,5 +3,16 @@
 
 actor: ApiTester
 modules:
-    enabled:
-        - \Helper\Api
+  enabled:
+    - \Helper\Api
+    - Db:
+        dsn: 'mysql:host=localhost;dbname=idatg2204'
+        user: 'root'
+        password: ''
+        dump: 'tests/_data/db.sql'
+        populate: true
+        cleanup: true
+        populator: 'mysql -u $user -h $host $dbname < $dump'
+    - REST:
+        url: http://localhost/rest/
+        depends: PhpBrowser

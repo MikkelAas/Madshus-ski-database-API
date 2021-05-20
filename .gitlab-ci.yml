@@ -6,6 +6,8 @@ cache:
     - vendor/
 
 before_script:
+  # Print working directory
+  - pwd
   # Install all project dependencies
   - composer install
   # Run webserver
