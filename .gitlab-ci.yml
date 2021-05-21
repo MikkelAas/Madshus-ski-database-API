@@ -48,6 +48,8 @@ before_script:
   - cat /etc/apache2/apache2.conf | sed -e "s|/var/www/|$(pwd)|" | sed -e "s|AllowOverride None|AllowOverride All|" > /etc/apache2/apache2.newconf
   - mv /etc/apache2/apache2.newconf /etc/apache2/apache2.conf
   - cat /etc/apache2/apache2.conf
+  # Enable rewriting
+  - a2enmod rewrite
   # Start apache2
   - service apache2 start
 
