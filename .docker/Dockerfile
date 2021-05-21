@@ -20,6 +20,8 @@ RUN apt-get install -qqy php-mysql
 RUN apt-get install -qqy php-curl
 RUN apt-get install -qqy php-dom
 RUN apt-get install -qqy php-mbstring
+# Install apache2
+RUN apt-get install -qqy apache2
 # Install curl
 RUN apt-get install -qqy curl
 # Install composer

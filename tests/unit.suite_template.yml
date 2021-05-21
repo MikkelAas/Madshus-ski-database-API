@@ -7,7 +7,7 @@ actor: UnitTester
 modules:
     enabled:
         - Db:
-            dsn: 'mysql:host=localhost;dbname=db_project'
+            dsn: 'mysql:host=localhost;dbname=idatg2204'
             user: 'root'
             password: ''
             dump: 'tests/_data/db.sql'

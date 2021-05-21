@@ -6,6 +6,21 @@ cache:
     - vendor/
 
 before_script:
+  # Print working directory
+  - pwd
+  # Setup apache2 document root
+  - cat /etc/apache2/sites-enabled/000-default.conf | sed -e "s|/var/www/html|$(pwd)/public|" > /etc/apache2/sites-enabled/test.conf
+  - rm /etc/apache2/sites-enabled/000-default.conf
+  - cat /etc/apache2/sites-enabled/test.conf
+  # Update apache2.conf
+  - cat /etc/apache2/apache2.conf | sed -e "s|/var/www/|$(pwd)|" | sed -e "s|AllowOverride None|AllowOverride All|" > /etc/apache2/apache2.newconf
+  - mv /etc/apache2/apache2.newconf /etc/apache2/apache2.conf
+  - echo "DocumentRoot \"$(pwd)/public\"" >> /etc/apache2/apache2.conf
+  - cat /etc/apache2/apache2.conf
+  # Enable rewriting
+  - a2enmod rewrite
+  # Start apache2
+  - service apache2 start
   # Install all project dependencies
   - composer install
   # Run webserver
@@ -13,7 +28,7 @@ before_script:
   # Run mysql
   - service mysql start
   # Create test database
-  - mysql -u root -e "CREATE DATABASE db_project"
+  - mysql -u root -e "CREATE DATABASE idatg2204"
   # Setup test user
   - mysql -u root -e "CREATE USER 'idatg2204'@'%' IDENTIFIED BY 'password';"
   - mysql -u root -e "GRANT ALL PRIVILEGES ON * . * TO 'idatg2204'@'%';"
@@ -28,9 +43,10 @@ before_script:
     'db_port' => '3306',
     'db_username' => 'root',
     'db_password' => '',
-    'db_name' => 'db_project',
+    'db_name' => 'idatg2204',
     'db_charset' => 'utf8mb4'
     );" >> config/config_test.php
+  - cp config/config_test.php config/config.php
   # Print config file
   - cat config/config_test.php
   # Copy template file for tests
@@ -43,3 +59,6 @@ before_script:
 test:
   script:
     - vendor/bin/codecept run
+  after_script:
+    - cat tests/_output/*
+    - cat /var/log/apache2/*
