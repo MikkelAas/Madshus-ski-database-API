@@ -55,7 +55,6 @@ switch ($method){
             $customerId = $res['customer_id'];
             $stateMessage = $res['state'];
             $employeeId = $res['employee_id'];
-            // TODO: Fix this. Doesn't align with json input.
             $skis = $res['skis'];
             $skiTypeQuantityMap = [];
 
@@ -85,7 +84,6 @@ switch ($method){
     case "DELETE":
         if (array_key_exists(4, $pathParts) && is_numeric($pathParts[4]) && array_key_exists(3, $pathParts) && $pathParts[3] == 'orders'){
             $res = $orderModel->getOrder($pathParts[4]);
-            echo var_dump($res);
             $orderModel->deleteOrder($pathParts[4]);
         } else {
             http_response_code(400);
