@@ -255,7 +255,7 @@ class OrderModel{
 
             $orderInfo = $this->getOrder($orderId);
             if (empty($orderInfo)){
-                throw new Exception("order does not exist");
+                throw new InvalidArgumentException("order does not exist");
             }
             // Find all ski types in the order
             $skiTypesInOrder = $this->getAllSkiTypesInOrder($orderId);
@@ -307,7 +307,7 @@ class OrderModel{
                 $stmt->execute();
             }
 
-            $customerId = $orderInfo[0][0]['customer_id'];
+            $customerId = (int)$orderInfo[0][0]['customer_id'];
             // Creates a new order with the unfilled skis and sets a reference to the original order
             $this->createOrder(0, $orderId, $customerId, "new", null, $unfilledSkis);
 
