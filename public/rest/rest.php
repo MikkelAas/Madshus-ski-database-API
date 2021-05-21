@@ -14,7 +14,8 @@ $endpoints = [
     "/rest/com/stor/orders"=>["public/rest/com/stor/keeper.php", new Privileges(true, false, false)],
     "/rest/com/cus/orders"=>["public/rest/com/cus/customer.php", new Privileges(true, false, false)],
     "/rest/com/cus/req_ship"=>["public/rest/com/cus/customer.php", new Privileges(true, false, false)],
-    "/rest/cus/orders"=>["public/rest/cus/orders.php", new Privileges(false, true, false)]
+    "/rest/cus/orders"=>["public/rest/cus/orders.php", new Privileges(false, true, false)],
+    "/rest/cus/orders/split"=>["public/rest/cus/orders.php", new Privileges(false, true, false)]
   ];
 
 $queries = [];
