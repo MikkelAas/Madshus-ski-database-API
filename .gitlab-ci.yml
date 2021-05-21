@@ -52,6 +52,8 @@ before_script:
   - a2enmod rewrite
   # Start apache2
   - service apache2 start
+  # Test web server
+  - curl http://localhost/rest/ghghh
 
 # Test
 test:
