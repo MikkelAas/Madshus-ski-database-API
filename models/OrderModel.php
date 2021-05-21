@@ -244,20 +244,22 @@ class OrderModel{
         }
     }
 
+    /**
+     * Splits an order.
+     * @param int $orderId Takes the order id that you want to split as input.
+     * @throws Exception Throws an exception if the order failed to split.
+     */
     public function splitOrder(int $orderId){
         try {
             $this->db->beginTransaction();
 
             $orderInfo = $this->getOrder($orderId);
+            if (empty($orderInfo)){
+                throw new InvalidArgumentException("order does not exist");
+            }
             // Find all ski types in the order
             $skiTypesInOrder = $this->getAllSkiTypesInOrder($orderId);
             $filledSkis = $this->getFilledSkis($orderId);
-
-            print("--- Ski types ---");
-            print_r($skiTypesInOrder);
-
-            print("--- Filled skis ---");
-            print_r($filledSkis);
 
             $unfilledSkis = [];
 
@@ -270,14 +272,8 @@ class OrderModel{
                 }
             }
 
-            print("--- Unfilled skis ---");
-            print_r($unfilledSkis);
-
             // Assign produced skis
             $affectedSkiTypes = $this->assignProducedSki($orderId, $skiTypesInOrder);
-
-            print("--- Affected ski types ---");
-            print_r($affectedSkiTypes);
 
             // Update quantity of "old" order
             foreach ($filledSkis as $skiType=>$quantity){
@@ -311,16 +307,14 @@ class OrderModel{
                 $stmt->execute();
             }
 
-            $customerId = $orderInfo[0][0]['customer_id'];
-            print("--- Unfilled skis 2 ---");
-            print_r($unfilledSkis);
+            $customerId = (int)$orderInfo[0][0]['customer_id'];
             // Creates a new order with the unfilled skis and sets a reference to the original order
             $this->createOrder(0, $orderId, $customerId, "new", null, $unfilledSkis);
 
             $this->db->commit();
         } catch (Exception $e){
             $this->db->rollBack();
-            echo "Failed: " . $e->getMessage();
+            throw new Exception("failed to split the order");
         }
     }
 
