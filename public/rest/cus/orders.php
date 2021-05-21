@@ -1,7 +1,7 @@
 <?php
 
-require ('models/OrderModel.php');
-require ('models/PlanModel.php');
+require_once ('models/OrderModel.php');
+require_once ('models/PlanModel.php');
 
 $orderModel = new OrderModel();
 $planModel = new PlanModel();
@@ -17,6 +17,14 @@ switch ($method){
             $res = $orderModel->getOrders(NULL);
         } else if (array_key_exists(3, $pathParts) && str_starts_with($pathParts[3], 'plan')) {
             $planModel->getPlan();
+        } else if (array_key_exists(5, $pathParts) && is_numeric($pathParts[5]) && array_key_exists(4, $pathParts) && $pathParts[4] == "split"){
+            try {
+                $orderModel->splitOrder((int)$pathParts[5]);
+            } catch (Exception $e){
+                http_response_code(400);
+                echo json_encode(array("error" => "failed to split the order"));
+                return;
+            }
         }
         else {
             http_response_code(400);
@@ -26,14 +34,39 @@ switch ($method){
     case "POST":
         if (array_key_exists(4, $pathParts) && str_ends_with($pathParts[4], "create")) {
 
-            $data = json_decode(file_get_contents('php://input'), true);
+            $res = json_decode(file_get_contents('php://input'), true);
 
-            $totalPrice = $data['total_price'];
-            $refToLargerOrder = $data['reference_to_larger_order'];
-            $customerId = $data['customer_id'];
-            $stateMessage = $data['state'];
-            $employeeId = $data['employee_id'];
-            $skiTypeQuantityMap = $data['ski_type_quantity_map'];
+            if (!(
+                array_key_exists('total_price', $res)
+                && array_key_exists('reference_to_larger_order', $res)
+                && array_key_exists('customer_id', $res)
+                && array_key_exists('state', $res)
+                && array_key_exists('employee_id', $res)
+                && array_key_exists('skis', $res)
+            )
+            ){
+                http_response_code(400);
+                echo json_encode(array("error" => "invalid input, check your json!"));
+                return;
+            }
+
+            $totalPrice = $res['total_price'];
+            $refToLargerOrder = $res['reference_to_larger_order'];
+            $customerId = $res['customer_id'];
+            $stateMessage = $res['state'];
+            $employeeId = $res['employee_id'];
+            // TODO: Fix this. Doesn't align with json input.
+            $skis = $res['skis'];
+            $skiTypeQuantityMap = [];
+
+            foreach ($skis as $ski){
+                if (!(array_key_exists('ski_type_id', $ski) && array_key_exists('quantity', $ski))){
+                    http_response_code(400);
+                    echo json_encode(array("error" => "invalid input, check your json!"));
+                    return;
+                }
+                $skiTypeQuantityMap[$ski['ski_type_id']] = $ski['quantity'];
+            }
 
             $orderModel->createOrder(
                 $totalPrice,
@@ -44,30 +77,32 @@ switch ($method){
                 $skiTypeQuantityMap
             );
             http_response_code(201);
-            return;
-        } else if (array_key_exists(3, $pathParts[3]) && str_starts_with($pathParts[3], "split")){
-            if (array_key_exists('order_id', $queries)){
-                $orderModel->splitOrder($queries['order_id']);
-            }
         } else {
             http_response_code(400);
             echo json_encode(array("error"=>"invalid endpoint"));
-            return;
         }
+        break;
     case "DELETE":
         if (array_key_exists(4, $pathParts) && is_numeric($pathParts[4]) && array_key_exists(3, $pathParts) && $pathParts[3] == 'orders'){
+            $res = $orderModel->getOrder($pathParts[4]);
+            echo var_dump($res);
             $orderModel->deleteOrder($pathParts[4]);
-            return;
         } else {
             http_response_code(400);
             echo json_encode(array("error"=>"invalid endpoint"));
         }
+        break;
     default:
         http_response_code(405);
         echo json_encode(array("error"=>"invalid method " . $method));
         return;
 }
+
+
 if (!empty($res)){
+    if (sizeof($res) == 1){
+        $res = $res[0];
+    }
     echo json_encode($res);
 } else {
     http_response_code(400);
