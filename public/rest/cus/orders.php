@@ -6,7 +6,7 @@ require_once ('models/PlanModel.php');
 $orderModel = new OrderModel();
 $planModel = new PlanModel();
 
-
+// A switch case for http methods
 switch ($method){
     case "GET":
         if (array_key_exists(4, $pathParts) && is_numeric($pathParts[4])) {
