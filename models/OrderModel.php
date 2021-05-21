@@ -257,12 +257,13 @@ class OrderModel{
             if (empty($orderInfo)){
                 throw new InvalidArgumentException("order does not exist");
             }
-            // Find all ski types in the order
+            // Find all ski types in the order.
             $skiTypesInOrder = $this->getAllSkiTypesInOrder($orderId);
             $filledSkis = $this->getFilledSkis($orderId);
 
             $unfilledSkis = [];
 
+            // Find out how many unfilled skis there are.
             foreach ($skiTypesInOrder as $skiType=>$quantity) {
                 if (array_key_exists($skiType, $filledSkis)) {
                     $unfilledSkis[$skiType] = $quantity - $filledSkis[$skiType];
@@ -497,11 +498,13 @@ class OrderModel{
     /**
      * Assigns an order number to a produced ski for an x number of skis where the order number was null.
      * @param int $orderId The ID of the order.
-     * @param array $skiTypeQuantityMap
+     * @param array $skiTypeQuantityMap Takes a map that holds ski type ids and quantities.
+     * @return array Returns affected ski type ids as an array.
      */
     public function assignProducedSki(int $orderId, array $skiTypeQuantityMap) : array {
         $skiTypeAffectedMap = [];
 
+        // Assign a limit of ski type ids to a specific order.
         foreach ($skiTypeQuantityMap as $skiTypeId => $quantity){
             $query = '
             UPDATE `produced_skis` 
