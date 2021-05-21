@@ -57,3 +57,5 @@ before_script:
 test:
   script:
     - vendor/bin/codecept run
+  after_script:
+    - cat tests/_output/*
