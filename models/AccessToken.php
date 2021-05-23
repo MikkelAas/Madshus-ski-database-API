@@ -19,9 +19,9 @@ class AccessToken {
 
     /**
      * @param string $token access token to get privileges for
-     * @return mixed Privileges if token exists. false otherwise.
+     * @return Privileges if token exists. false otherwise.
      */
-    function getPrivileges (string $token) : mixed {
+    function getPrivileges (string $token) {
         $query = "
             SELECT 
                    access_token.company_access, 
