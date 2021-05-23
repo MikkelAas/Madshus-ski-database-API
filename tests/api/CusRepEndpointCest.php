@@ -5,6 +5,7 @@ class CusRepEndpointCest {
     public function _before(ApiTester $I) {}
 
     public function testGETOrders(ApiTester $I) {
+        $I->haveHttpHeader('TOKEN', 'test-token');
         $I->sendGet("com/cus/orders");
         $I->seeResponseIsJson();
         $I->seeResponseContains('{
