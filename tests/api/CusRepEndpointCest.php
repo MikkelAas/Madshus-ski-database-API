@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 0);
+
 class CusRepEndpointCest {
 
     public function _before(ApiTester $I) {}
