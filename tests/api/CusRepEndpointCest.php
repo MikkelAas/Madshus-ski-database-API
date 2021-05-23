@@ -19,4 +19,10 @@ class CusRepEndpointCest {
         $I->seeResponseCodeIs(\Codeception\Util\HttpCode::OK);
     }
 
+    public function testPOSTShipmentCreate (ApiTester $I) {
+        $I->haveHttpHeader('TOKEN', 'test-token');
+        $I->sendPOST("com/cus/req_ship", json_encode(["orders"=>[1, 10]]));
+        $I->seeResponseCodeIs(\Codeception\Util\HttpCode::OK);
+    }
+
 }
