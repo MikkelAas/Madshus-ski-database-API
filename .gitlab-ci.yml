@@ -41,8 +41,8 @@ before_script:
     'db_driver' => 'mysql',
     'db_host' => 'localhost',
     'db_port' => '3306',
-    'db_username' => 'root',
-    'db_password' => '',
+    'db_username' => 'idatg2204',
+    'db_password' => 'password',
     'db_name' => 'idatg2204',
     'db_charset' => 'utf8mb4'
     );" >> config/config_test.php

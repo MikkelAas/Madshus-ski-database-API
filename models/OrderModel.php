@@ -368,6 +368,7 @@ class OrderModel{
         // If the date is not present, just run the basic query.
         if (!$date){
             $query = sprintf($query,'');
+            $stmt = $this->db->prepare($query);
         }
         // Modifies the query to select everything after a specific date.
         else {
@@ -376,10 +377,11 @@ class OrderModel{
             ON ski_order_view.order_number = ski_order_state_history.ski_order_id
             WHERE
             ski_order_state_history.date >= :date');
+
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':date', $date);
         }
 
-        $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':date', $date);
         $stmt->execute();
 
         return $this->reformatArray($stmt);

@@ -8,7 +8,7 @@ $shipmentModel = new ShipmentModel();
 
 switch ($method) {
   case "GET":
-    if (array_key_exists(4, $pathParts) && str_starts_with($pathParts[4], "orders")) {
+    if (array_key_exists(4, $pathParts) && strpos($pathParts[4], "orders") === 0) {
       if (array_key_exists("state", $queries)) {
         $res = $orderModel->getOrdersBasedOnState($queries["state"]);
       } else {
