@@ -13,4 +13,10 @@ class CusRepEndpointCest {
         $I->seeResponseContains('[{"order_number":"1","total_price":"100","reference_to_larger_order":null,"customer_id":"1","skis":[{"ski_type_id":"1","quantity":"4"}]}');
     }
 
+    public function testPATCHOrder (ApiTester $I) {
+        $I->haveHttpHeader('TOKEN', 'test-token');
+        $I->sendPATCH("com/cus/orders/1", json_encode(["id"=>1, "state"=>"new"]));
+        $I->seeResponseCodeIs(\Codeception\Util\HttpCode::OK);
+    }
+
 }
